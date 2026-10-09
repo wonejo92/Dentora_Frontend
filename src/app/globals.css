@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+/* Dentora · estilo A "Clínico moderno" */
+@theme {
+  --color-brand-50: #e0f2f5;
+  --color-brand-100: #c7e7ec;
+  --color-brand-200: #9fd3dd;
+  --color-brand-500: #0e7490;
+  --color-brand-600: #0b5f76;
+  --color-brand-700: #0a4e61;
+
+  --color-ink: #0f2a33;
+  --color-muted: #5b7580;
+  --color-line: #e3ecef;
+  --color-canvas: #f7fafb;
+
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+}
