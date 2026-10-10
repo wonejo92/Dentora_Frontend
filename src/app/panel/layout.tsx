@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   BellIcon,
   CalendarIcon,
+  CalendarOffIcon,
   ChartIcon,
   DashboardIcon,
   SearchIcon,
@@ -21,36 +22,45 @@ import { SIDEBAR_COOKIE } from "@/lib/constants";
 import { guard, requireClinicUser } from "@/lib/dal";
 import { initials, roleLabels } from "@/lib/labels";
 import { formatLongDate, localDate } from "@/lib/time";
-import type { Appointment } from "@/lib/types";
+import type { Appointment, Role } from "@/lib/types";
 
-const groups: NavGroup[] = [
-  {
-    title: "General",
-    items: [
-      { href: "/panel", label: "Resumen", icon: <DashboardIcon /> },
-      { href: "/panel/agenda", label: "Agenda", icon: <CalendarIcon /> },
-    ],
-  },
-  {
-    title: "Clínica",
-    items: [
-      { href: "/panel/pacientes", label: "Pacientes", icon: <UsersIcon /> },
-      { href: "/panel/doctores", label: "Doctores", icon: <StethoscopeIcon /> },
-      { href: "/panel/tratamientos", label: "Tratamientos", icon: <ToothIcon /> },
-    ],
-  },
-  {
-    title: "Análisis",
-    items: [{ href: "/panel/reportes", label: "Reportes", icon: <ChartIcon /> }],
-  },
-  {
-    title: "Configuración",
-    items: [
-      { href: "/panel/ajustes/personal", label: "Personal", icon: <UserCogIcon /> },
-      { href: "/panel/ajustes", label: "Ajustes", icon: <SettingsIcon /> },
-    ],
-  },
-];
+/** Menú según el rol: Personal y Ajustes son solo para el dueño. */
+function navFor(role: Role): NavGroup[] {
+  const isOwner = role === "OWNER";
+  return [
+    {
+      title: "General",
+      items: [
+        { href: "/panel", label: "Resumen", icon: <DashboardIcon /> },
+        { href: "/panel/agenda", label: "Agenda", icon: <CalendarIcon /> },
+        { href: "/panel/feriados", label: "Feriados", icon: <CalendarOffIcon /> },
+      ],
+    },
+    {
+      title: "Clínica",
+      items: [
+        { href: "/panel/pacientes", label: "Pacientes", icon: <UsersIcon /> },
+        { href: "/panel/doctores", label: "Doctores", icon: <StethoscopeIcon /> },
+        { href: "/panel/tratamientos", label: "Tratamientos", icon: <ToothIcon /> },
+      ],
+    },
+    {
+      title: "Análisis",
+      items: [{ href: "/panel/reportes", label: "Reportes", icon: <ChartIcon /> }],
+    },
+    ...(isOwner
+      ? [
+          {
+            title: "Configuración",
+            items: [
+              { href: "/panel/ajustes/personal", label: "Personal", icon: <UserCogIcon /> },
+              { href: "/panel/ajustes", label: "Ajustes", icon: <SettingsIcon /> },
+            ],
+          },
+        ]
+      : []),
+  ];
+}
 
 /** Reservas pendientes de confirmar en los próximos 60 días (para la campana). */
 async function countPending() {
@@ -73,7 +83,7 @@ export default async function PanelLayout({ children }: LayoutProps<"/panel">) {
   return (
     <div className="min-h-screen lg:flex">
       <Sidebar
-        groups={groups}
+        groups={navFor(me.role)}
         clinicName={me.clinic.name}
         initialCollapsed={collapsed}
         user={{
@@ -81,6 +91,7 @@ export default async function PanelLayout({ children }: LayoutProps<"/panel">) {
           email: me.email,
           role: roleLabels[me.role],
           initials: initials(me.fullName),
+          canManage: me.role === "OWNER",
         }}
       />
 

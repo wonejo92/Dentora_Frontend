@@ -110,3 +110,8 @@ export const UserIcon = () => (
     <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
   </svg>
 );
+export const CalendarOffIcon = () => (
+  <svg {...base}>
+    <path d="M9 5h9a2 2 0 0 1 2 2v9M19.8 19.8A2 2 0 0 1 18 21H6a2 2 0 0 1-2-2V7a2 2 0 0 1 1.6-2M16 3v4M8 3v1M4 11h7M15 11h5M3 3l18 18" />
+  </svg>
+);

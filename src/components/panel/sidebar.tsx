@@ -32,7 +32,7 @@ export function Sidebar({
 }: {
   groups: NavGroup[];
   clinicName: string;
-  user: { fullName: string; email: string; role: string; initials: string };
+  user: { fullName: string; email: string; role: string; initials: string; canManage: boolean };
   initialCollapsed: boolean;
 }) {
   const pathname = usePathname();
@@ -195,7 +195,7 @@ function UserCard({
   user,
   collapsed,
 }: {
-  user: { fullName: string; email: string; role: string; initials: string };
+  user: { fullName: string; email: string; role: string; initials: string; canManage: boolean };
   collapsed: boolean;
 }) {
   const [open, setOpen] = useState(false);
@@ -233,6 +233,7 @@ function UserCard({
             <p className="truncate text-sm font-semibold">{user.fullName}</p>
             <p className="truncate text-xs text-muted">{user.email}</p>
           </div>
+          {user.canManage && (
           <Link
             href="/panel/ajustes"
             role="menuitem"
@@ -242,6 +243,7 @@ function UserCard({
             <SettingsIcon />
             Ajustes
           </Link>
+          )}
           <form action={logout} className="border-t border-line">
             <button
               type="submit"
