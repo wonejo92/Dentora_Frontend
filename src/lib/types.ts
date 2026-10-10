@@ -112,3 +112,27 @@ export interface DoctorOption {
   color: string;
   isActive: boolean;
 }
+
+export interface ScheduleBlock {
+  dayOfWeek: number;
+  startMinute: number;
+  endMinute: number;
+}
+
+export interface Doctor extends DoctorOption {
+  bio: string | null;
+  photoUrl: string | null;
+  userId: string | null;
+  user: { id: string; email: string } | null;
+  treatments: { id: string; name: string; durationMin: number }[];
+  schedules: ScheduleBlock[];
+}
+
+export interface StaffUser {
+  id: string;
+  email: string;
+  fullName: string;
+  role: Role;
+  isActive: boolean;
+  doctor: { id: string } | null;
+}
