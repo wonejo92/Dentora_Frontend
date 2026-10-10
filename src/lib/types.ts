@@ -75,15 +75,27 @@ export interface DashboardSummary {
   todayAppointments: Appointment[];
 }
 
+export type IdType = "CEDULA" | "RUC" | "PASAPORTE";
+export type Gender = "MALE" | "FEMALE" | "OTHER";
+
 export interface Patient {
   id: string;
-  idType: "CEDULA" | "RUC" | "PASAPORTE";
+  idType: IdType;
   idNumber: string;
   firstName: string;
   lastName: string;
   email: string | null;
   phone: string | null;
+  birthDate: string | null;
+  gender: Gender | null;
+  address: string | null;
+  notes: string | null;
+  dataConsentAt: string | null;
   createdAt: string;
+}
+
+export interface PatientDetail extends Patient {
+  appointments: Appointment[];
 }
 
 export interface Paginated<T> {

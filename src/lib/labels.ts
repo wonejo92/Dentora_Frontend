@@ -1,4 +1,4 @@
-import type { Role } from "./types";
+import type { Gender, IdType, Role } from "./types";
 
 export const roleLabels: Record<Role, string> = {
   SUPER_ADMIN: "Super-admin",
@@ -15,3 +15,15 @@ export const initials = (name: string) =>
     .slice(0, 2)
     .map((w) => w[0]?.toUpperCase())
     .join("");
+
+export const idTypeLabels: Record<IdType, string> = {
+  CEDULA: "Cédula",
+  RUC: "RUC",
+  PASAPORTE: "Pasaporte",
+};
+
+export const genderLabels: Record<Gender, string> = {
+  FEMALE: "Femenino",
+  MALE: "Masculino",
+  OTHER: "Otro",
+};

@@ -61,3 +61,6 @@ export function calendarDaysUntil(iso: string, timeZone: string) {
   const target = Date.parse(localDate(new Date(iso), timeZone));
   return Math.round((target - today) / (24 * 60 * 60 * 1000));
 }
+
+/** ¿El instante `iso` todavía no ha pasado? */
+export const isFuture = (iso: string) => Date.parse(iso) >= Date.now();

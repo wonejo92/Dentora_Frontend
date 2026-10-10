@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Pagination } from "@/components/list/pagination";
 import { SearchInput } from "@/components/list/search-input";
+import { PatientDialog } from "@/components/patients/patient-dialog";
+import { buttonClass } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import { guard, requireClinicUser } from "@/lib/dal";
 import { initials } from "@/lib/labels";
@@ -33,8 +36,10 @@ export default async function PatientsPage({ searchParams }: PageProps<"/panel/p
               : `${total} ${total === 1 ? "paciente registrado" : "pacientes registrados"}`}
           </p>
         </div>
-        <SearchInput placeholder="Nombre, cédula o teléfono" />
+        <PatientDialog triggerClassName={buttonClass("primary")}>+ Nuevo paciente</PatientDialog>
       </div>
+
+      <SearchInput placeholder="Nombre, cédula o teléfono" />
 
       <section className="overflow-hidden rounded-3xl bg-white">
         {items.length === 0 ? (
@@ -63,14 +68,14 @@ export default async function PatientsPage({ searchParams }: PageProps<"/panel/p
                 {items.map((p) => (
                   <tr key={p.id} className="hover:bg-canvas/60">
                     <td className="px-6 py-3">
-                      <div className="flex items-center gap-3">
+                      <Link href={`/panel/pacientes/${p.id}`} className="group flex items-center gap-3">
                         <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-50 text-xs font-bold text-brand-600">
                           {initials(`${p.firstName.split(" ")[0]} ${p.lastName}`)}
                         </span>
-                        <span className="font-semibold">
+                        <span className="font-semibold group-hover:text-brand-600 group-hover:underline">
                           {p.firstName} {p.lastName}
                         </span>
-                      </div>
+                      </Link>
                     </td>
                     <td className="px-4 py-3 tabular-nums">
                       <span className="mr-1.5 text-xs text-muted">{p.idType === "CEDULA" ? "CI" : p.idType}</span>
