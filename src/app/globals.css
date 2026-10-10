@@ -1,5 +1,20 @@
 @import "tailwindcss";
 
+/*
+ * Variante "dark:" para los pocos casos que no se resuelven con tokens (p. ej. cambiar
+ * el ícono de sol/luna). Cubre el tema elegido y la opción "Sistema".
+ */
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme="light"]), :root:not([data-theme="light"]) *) {
+      @slot;
+    }
+  }
+}
+
 /* Dentora · estilo A "Clínico moderno" */
 @theme {
   --color-brand-50: #e0f2f5;
@@ -13,6 +28,8 @@
   --color-muted: #5b7580;
   --color-line: #e3ecef;
   --color-canvas: #f3f7f8;
+  /* Fondo de tarjetas, tablas, ventanas y campos */
+  --color-surface: #ffffff;
 
   /* Menú lateral oscuro */
   --color-night-900: #073b49;
@@ -29,6 +46,103 @@
 
 :root {
   color-scheme: light;
+}
+
+/*
+ * Tema oscuro: se redefinen los tokens, así que los componentes no necesitan
+ * clases "dark:". También se redefinen los colores de estado de Tailwind
+ * (green, amber, red, slate) para que las etiquetas sigan legibles.
+ *
+ * Se activa con data-theme="dark" en <html>, o con la opción "Sistema"
+ * (sin data-theme) cuando el sistema operativo está en oscuro.
+ */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-brand-50: #0f2f37;
+  --color-brand-100: #15414c;
+  --color-brand-200: #1f5a68;
+  --color-brand-500: #1593ae;
+  --color-brand-600: #3cb4ce;
+  --color-brand-700: #8fdceb;
+
+  --color-ink: #e6f0f2;
+  --color-muted: #8fa6ad;
+  --color-line: #22363c;
+  --color-canvas: #0b1417;
+  --color-surface: #111e22;
+
+  --color-night-900: #0c2a32;
+  --color-night-800: #164451;
+  --color-night-700: #1d4e5b;
+
+  --color-green-100: #12392a;
+  --color-green-700: #6bd6a0;
+  --color-green-800: #7ee2b0;
+
+  --color-amber-50: #241d0e;
+  --color-amber-100: #3a2c0e;
+  --color-amber-200: #5c4514;
+  --color-amber-600: #f5b544;
+  --color-amber-700: #f2b14a;
+  --color-amber-800: #f7c76a;
+  --color-amber-900: #fbd98e;
+
+  --color-red-50: #2e1415;
+  --color-red-100: #3d1a1c;
+  --color-red-300: #7a2e30;
+  --color-red-400: #c2474a;
+  --color-red-600: #e5484d;
+  --color-red-700: #f58a8c;
+
+  --color-slate-100: #1c2a2e;
+  --color-slate-600: #a7b6ba;
+}
+
+/* Opción "Sistema": mismos valores que arriba (CSS no permite reutilizar el bloque). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --color-brand-50: #0f2f37;
+    --color-brand-100: #15414c;
+    --color-brand-200: #1f5a68;
+    --color-brand-500: #1593ae;
+    --color-brand-600: #3cb4ce;
+    --color-brand-700: #8fdceb;
+
+    --color-ink: #e6f0f2;
+    --color-muted: #8fa6ad;
+    --color-line: #22363c;
+    --color-canvas: #0b1417;
+    --color-surface: #111e22;
+
+    --color-night-900: #0c2a32;
+    --color-night-800: #164451;
+    --color-night-700: #1d4e5b;
+
+    --color-green-100: #12392a;
+    --color-green-700: #6bd6a0;
+    --color-green-800: #7ee2b0;
+
+    --color-amber-50: #241d0e;
+    --color-amber-100: #3a2c0e;
+    --color-amber-200: #5c4514;
+    --color-amber-600: #f5b544;
+    --color-amber-700: #f2b14a;
+    --color-amber-800: #f7c76a;
+    --color-amber-900: #fbd98e;
+
+    --color-red-50: #2e1415;
+    --color-red-100: #3d1a1c;
+    --color-red-300: #7a2e30;
+    --color-red-400: #c2474a;
+    --color-red-600: #e5484d;
+    --color-red-700: #f58a8c;
+
+    --color-slate-100: #1c2a2e;
+    --color-slate-600: #a7b6ba;
+  }
 }
 
 body {
