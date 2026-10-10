@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronLeftIcon, ChevronRightIcon } from "@/components/panel/icons";
-import { Alert } from "@/components/ui/alert";
 import { buttonClass } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { api } from "@/lib/api";
@@ -18,10 +17,10 @@ import type { Appointment } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Agenda" };
 
-export default async function AgendaPage({ searchParams }: PageProps<"/panel">) {
+export default async function AgendaPage({ searchParams }: PageProps<"/panel/agenda">) {
   const me = await requireClinicUser();
   const tz = me.clinic.timezone;
-  const { fecha, bienvenida } = await searchParams;
+  const { fecha } = await searchParams;
 
   const today = localDate(new Date(), tz);
   const date = isValidDate(fecha) ? fecha : today;
@@ -35,16 +34,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/panel">) 
   const pending = appointments.filter((a) => a.status === "PENDING").length;
 
   return (
-    <div className="mx-auto max-w-4xl">
-      {bienvenida && (
-        <div className="mb-6">
-          <Alert tone="info">
-            ¡Bienvenido a Dentora! Empieza agregando tus tratamientos y doctores para abrir la
-            agenda.
-          </Alert>
-        </div>
-      )}
-
+    <div className="mx-auto max-w-6xl">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-sm text-muted">{formatLongDate(date)}</p>
@@ -54,19 +44,19 @@ export default async function AgendaPage({ searchParams }: PageProps<"/panel">) 
         </div>
         <nav aria-label="Cambiar de día" className="flex items-center gap-2">
           <Link
-            href={`/panel?fecha=${addDays(date, -1)}`}
+            href={`/panel/agenda?fecha=${addDays(date, -1)}`}
             aria-label="Día anterior"
             className={buttonClass("secondary", "px-2.5")}
           >
             <ChevronLeftIcon />
           </Link>
           {date !== today && (
-            <Link href="/panel" className={buttonClass("secondary")}>
+            <Link href="/panel/agenda" className={buttonClass("secondary")}>
               Hoy
             </Link>
           )}
           <Link
-            href={`/panel?fecha=${addDays(date, 1)}`}
+            href={`/panel/agenda?fecha=${addDays(date, 1)}`}
             aria-label="Día siguiente"
             className={buttonClass("secondary", "px-2.5")}
           >

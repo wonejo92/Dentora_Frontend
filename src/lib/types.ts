@@ -58,3 +58,37 @@ export interface AdminClinic {
   createdAt: string;
   _count: { patients: number; appointments: number; doctors: number; users: number };
 }
+
+export interface DashboardSummary {
+  today: string;
+  month: {
+    count: number;
+    previousCount: number;
+    changePct: number | null;
+    onlinePct: number;
+  };
+  todayCount: number;
+  pendingUpcoming: number;
+  weekly: { weekStart: string; count: number }[];
+  weeklyAverage: number;
+  nextAppointment: Appointment | null;
+  todayAppointments: Appointment[];
+}
+
+export interface Patient {
+  id: string;
+  idType: "CEDULA" | "RUC" | "PASAPORTE";
+  idNumber: string;
+  firstName: string;
+  lastName: string;
+  email: string | null;
+  phone: string | null;
+  createdAt: string;
+}
+
+export interface Paginated<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+}
