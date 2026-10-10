@@ -16,7 +16,7 @@ export default async function SettingsLayout({ children }: LayoutProps<"/panel/a
           {children}
         </>
       ) : (
-        <section className="rounded-3xl bg-white px-6 py-14 text-center">
+        <section className="rounded-3xl bg-surface px-6 py-14 text-center">
           <p className="font-semibold">Solo el dueño de la clínica puede cambiar los ajustes</p>
           <p className="mt-1 text-sm text-muted">Si necesitas cambiar algo, pídeselo a quien administra la cuenta.</p>
         </section>

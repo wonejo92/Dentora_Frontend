@@ -46,7 +46,7 @@ export function Modal({
       onClick={(e) => e.target === ref.current && onClose()}
       aria-labelledby="modal-title"
       className={cn(
-        "m-auto w-[calc(100%-2rem)] overflow-hidden rounded-3xl bg-white p-0 text-left font-normal text-ink backdrop:bg-night-900/50",
+        "m-auto w-[calc(100%-2rem)] overflow-hidden rounded-3xl bg-surface p-0 text-left font-normal text-ink backdrop:bg-night-900/50",
         sizes[size],
       )}
     >

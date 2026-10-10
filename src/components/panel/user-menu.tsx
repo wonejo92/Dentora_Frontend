@@ -12,7 +12,7 @@ export function UserMenu({ me, logout: showLogout = "always" }: { me: Me; logout
   return (
     <div
       className={cn(
-        "flex items-center gap-2 rounded-full bg-white p-1.5",
+        "flex items-center gap-2 rounded-full bg-surface p-1.5",
         showLogout === "mobile" && "lg:pr-4",
       )}
     >

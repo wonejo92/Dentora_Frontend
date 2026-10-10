@@ -80,12 +80,12 @@ export default async function DoctorsPage({ searchParams }: PageProps<"/panel/do
       )}
 
       {doctors.length > 0 && page.total === 0 ? (
-        <section className="rounded-3xl bg-white px-6 py-16 text-center">
+        <section className="rounded-3xl bg-surface px-6 py-16 text-center">
           <p className="font-semibold">Ningún doctor coincide</p>
           <p className="mt-1 text-sm text-muted">Prueba con otra búsqueda o quita algún filtro.</p>
         </section>
       ) : doctors.length === 0 ? (
-        <section className="rounded-3xl bg-white px-6 py-16 text-center">
+        <section className="rounded-3xl bg-surface px-6 py-16 text-center">
           <p className="font-semibold">Agrega a los doctores de tu clínica</p>
           <p className="mx-auto mt-1 max-w-md text-sm text-muted">
             Con su horario y los tratamientos que realiza, la agenda calcula sola los horarios
@@ -99,7 +99,7 @@ export default async function DoctorsPage({ searchParams }: PageProps<"/panel/do
             return (
               <article
                 key={d.id}
-                className={cn("flex flex-col rounded-3xl bg-white p-5", !d.isActive && "opacity-70")}
+                className={cn("flex flex-col rounded-3xl bg-surface p-5", !d.isActive && "opacity-70")}
               >
                 <div className="flex items-start gap-4">
                   <span

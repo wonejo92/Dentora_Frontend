@@ -16,6 +16,7 @@ import {
 import { NewAppointmentDialog } from "@/components/appointments/new-appointment-dialog";
 import { Sidebar, type NavGroup } from "@/components/panel/sidebar";
 import { TrialBanner } from "@/components/panel/trial-banner";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { UserMenu } from "@/components/panel/user-menu";
 import { api } from "@/lib/api";
 import { SIDEBAR_COOKIE } from "@/lib/constants";
@@ -99,7 +100,7 @@ export default async function PanelLayout({ children }: LayoutProps<"/panel">) {
         {me.role === "OWNER" && <TrialBanner clinic={me.clinic} />}
         <header className="flex items-center justify-between gap-2 px-4 pt-4 sm:gap-3 sm:px-8 sm:pt-6">
           <form action="/panel/pacientes" role="search" className="hidden w-full max-w-xs md:block">
-            <label className="flex h-11 items-center gap-2 rounded-full border border-line bg-white px-4 text-muted transition-colors focus-within:border-brand-500 focus-within:ring-4 focus-within:ring-brand-50">
+            <label className="flex h-11 items-center gap-2 rounded-full border border-line bg-surface px-4 text-muted transition-colors focus-within:border-brand-500 focus-within:ring-4 focus-within:ring-brand-50">
               <SearchIcon />
               <span className="sr-only">Buscar paciente</span>
               <input
@@ -120,15 +121,16 @@ export default async function PanelLayout({ children }: LayoutProps<"/panel">) {
               </svg>
             </NewAppointmentDialog>
             <UserMenu me={me} logout="mobile" />
-            <div className="hidden items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm xl:flex">
+            <div className="hidden items-center gap-2 rounded-full bg-surface px-4 py-2.5 text-sm xl:flex">
               <CalendarIcon />
               {today}
             </div>
+            <ThemeToggle />
             <Link
               href="/panel/agenda"
               aria-label={`${pending} reservas por confirmar`}
               title="Reservas por confirmar"
-              className="relative flex size-11 items-center justify-center rounded-full bg-white text-ink transition-colors hover:bg-brand-50"
+              className="relative flex size-11 items-center justify-center rounded-full bg-surface text-ink transition-colors hover:bg-brand-50"
             >
               <BellIcon />
               {pending > 0 && (

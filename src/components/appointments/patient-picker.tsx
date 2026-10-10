@@ -40,7 +40,7 @@ export function PatientPicker({ onSelect }: { onSelect: (patient: Patient) => vo
 
   return (
     <div className="space-y-2">
-      <label className="flex h-11 items-center gap-2 rounded-xl border border-line bg-white px-3.5 text-muted focus-within:border-brand-500 focus-within:ring-4 focus-within:ring-brand-50">
+      <label className="flex h-11 items-center gap-2 rounded-xl border border-line bg-surface px-3.5 text-muted focus-within:border-brand-500 focus-within:ring-4 focus-within:ring-brand-50">
         <SearchIcon />
         <span className="sr-only">Buscar paciente</span>
         <input

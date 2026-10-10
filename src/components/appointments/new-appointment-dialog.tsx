@@ -179,11 +179,11 @@ function NewAppointmentForm({
                     "rounded-2xl border px-4 py-2.5 text-left transition-colors disabled:cursor-not-allowed",
                     t.id === treatmentId
                       ? "border-brand-500 bg-brand-500 text-white"
-                      : "border-line bg-white hover:border-brand-200 hover:bg-brand-50",
+                      : "border-line bg-surface hover:border-brand-200 hover:bg-brand-50",
                   )}
                 >
                   <span className="block text-sm font-semibold">{t.name}</span>
-                  <span className={cn("block text-xs", t.id === treatmentId ? "text-brand-100" : "text-muted")}>
+                  <span className={cn("block text-xs", t.id === treatmentId ? "text-white/75" : "text-muted")}>
                     {formatDuration(t.durationMin)}
                     {t.price !== null && ` · ${formatPrice(t.price)}`}
                   </span>
@@ -216,7 +216,7 @@ function NewAppointmentForm({
             rows={2}
             maxLength={1000}
             placeholder="Motivo de la consulta, indicaciones para la recepción…"
-            className="w-full resize-y rounded-xl border border-line bg-white px-3.5 py-2.5 text-sm placeholder:text-muted/70 focus:border-brand-500 focus:ring-4 focus:ring-brand-50 focus:outline-none disabled:bg-canvas"
+            className="w-full resize-y rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm placeholder:text-muted/70 focus:border-brand-500 focus:ring-4 focus:ring-brand-50 focus:outline-none disabled:bg-canvas"
           />
         </Step>
       </div>

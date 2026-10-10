@@ -129,7 +129,7 @@ function TimeOffForm({
               onClick={() => setMode(value)}
               className={cn(
                 "rounded-full py-2 text-sm font-medium transition-colors",
-                mode === value ? "bg-white text-ink shadow-sm" : "text-muted hover:text-ink",
+                mode === value ? "bg-surface text-ink shadow-sm" : "text-muted hover:text-ink",
               )}
             >
               {label}

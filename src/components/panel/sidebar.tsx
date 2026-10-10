@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { logout } from "@/app/actions/auth";
 import { cn } from "@/lib/cn";
 import { SIDEBAR_COOKIE } from "@/lib/constants";
+import { ThemeSwitch } from "@/components/theme/theme-toggle";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -83,7 +84,7 @@ export function Sidebar({
             aria-keyshortcuts="Meta+B Control+B"
             title={`${collapsed ? "Expandir" : "Contraer"} menú (${shortcut})`}
             suppressHydrationWarning
-            className="absolute top-8 -right-3.5 z-10 flex size-7 items-center justify-center rounded-full border border-line bg-white text-brand-600 shadow-md shadow-ink/10 transition-colors hover:border-brand-200 hover:bg-brand-50 focus-visible:ring-4 focus-visible:ring-brand-50 focus-visible:outline-none"
+            className="absolute top-8 -right-3.5 z-10 flex size-7 items-center justify-center rounded-full border border-line bg-surface text-brand-600 shadow-md shadow-black/10 transition-colors hover:border-brand-200 hover:bg-brand-50 focus-visible:ring-4 focus-visible:ring-brand-50 focus-visible:outline-none"
           >
             <span className="scale-75">{collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}</span>
           </button>
@@ -225,13 +226,17 @@ function UserCard({
         <div
           role="menu"
           className={cn(
-            "absolute bottom-full z-20 mb-2 overflow-hidden rounded-2xl border border-line bg-white shadow-xl shadow-ink/10",
-            collapsed ? "left-0 w-60" : "inset-x-0",
+            "absolute bottom-full z-20 mb-2 overflow-hidden rounded-2xl border border-line bg-surface shadow-xl shadow-black/10",
+            collapsed ? "left-0 w-64" : "inset-x-0",
           )}
         >
           <div className="border-b border-line px-4 py-3">
             <p className="truncate text-sm font-semibold">{user.fullName}</p>
             <p className="truncate text-xs text-muted">{user.email}</p>
+          </div>
+          <div className="border-b border-line px-3 py-3">
+            <p className="mb-2 px-1 text-xs text-muted">Tema</p>
+            <ThemeSwitch />
           </div>
           {user.canManage && (
           <Link

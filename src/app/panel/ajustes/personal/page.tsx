@@ -25,7 +25,7 @@ export default async function StaffPage() {
         <UserDialog triggerClassName={buttonClass("primary")}>+ Nuevo usuario</UserDialog>
       </div>
 
-      <section className="overflow-hidden rounded-3xl bg-white">
+      <section className="overflow-hidden rounded-3xl bg-surface">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead className="border-b border-line text-xs text-muted">

@@ -40,7 +40,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/panel"
         </Alert>
       )}
 
-      <section className="rounded-3xl bg-white p-5 sm:p-7">
+      <section className="rounded-3xl bg-surface p-5 sm:p-7">
         <p className="text-muted">Citas en {monthName(data.today)}</p>
         <div className="mt-1 mb-6 flex flex-wrap items-center gap-3">
           <span className="text-5xl font-extrabold tracking-tight sm:text-6xl">
@@ -76,24 +76,15 @@ export default async function DashboardPage({ searchParams }: PageProps<"/panel"
       </section>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
-        <section className="rounded-3xl bg-white p-5 sm:p-6">
+        <section className="rounded-3xl bg-surface p-5 sm:p-6">
           <h2 className="mb-4 font-semibold">Citas por semana, últimas 12 semanas</h2>
           <WeeklyChart weeks={data.weekly} average={data.weeklyAverage} />
-          <div className="mt-3 flex gap-5 text-xs text-muted">
-            <span className="flex items-center gap-2">
-              <span className="h-0.5 w-4 bg-brand-500" /> Citas
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="w-4 border-t-2 border-dashed border-warm-500" /> Promedio (
-              {data.weeklyAverage.toLocaleString("es-EC")})
-            </span>
-          </div>
         </section>
 
         <NextAppointment appointment={data.nextAppointment} timeZone={tz} today={data.today} />
       </div>
 
-      <section className="rounded-3xl bg-white p-5 sm:p-6">
+      <section className="rounded-3xl bg-surface p-5 sm:p-6">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-semibold">Citas de hoy</h2>
           <Link href="/panel/agenda" className="text-sm font-semibold text-brand-500 hover:text-brand-600">

@@ -53,7 +53,7 @@ export default async function PatientPage({ params }: PageProps<"/panel/paciente
         Pacientes
       </Link>
 
-      <section className="flex flex-wrap items-start gap-5 rounded-3xl bg-white p-6">
+      <section className="flex flex-wrap items-start gap-5 rounded-3xl bg-surface p-6">
         <span className="flex size-16 shrink-0 items-center justify-center rounded-full bg-brand-50 text-xl font-bold text-brand-600">
           {initials(`${p.firstName.split(" ")[0]} ${p.lastName}`)}
         </span>
@@ -144,7 +144,7 @@ export default async function PatientPage({ params }: PageProps<"/panel/paciente
                 </div>
               )}
               {lastVisit && (
-                <div className="rounded-3xl bg-white p-5">
+                <div className="rounded-3xl bg-surface p-5">
                   <p className="text-xs text-muted">Última visita</p>
                   <p className="mt-1 text-lg font-bold first-letter:uppercase">
                     {date(lastVisit.startsAt, { day: "numeric", month: "long", year: "numeric" })}
@@ -221,7 +221,7 @@ function Chip({ children }: { children: React.ReactNode }) {
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-3xl bg-white p-6">
+    <section className="rounded-3xl bg-surface p-6">
       <h2 className="mb-4 font-semibold">{title}</h2>
       {children}
     </section>
@@ -239,7 +239,7 @@ function Row({ label, value }: { label: string; value: string | null }) {
 
 function Stat({ label, value, tone }: { label: string; value: number; tone?: "danger" }) {
   return (
-    <div className="rounded-2xl bg-white px-4 py-3">
+    <div className="rounded-2xl bg-surface px-4 py-3">
       <p className="text-xs text-muted">{label}</p>
       <p className={`text-2xl font-bold ${tone === "danger" ? "text-red-600" : ""}`}>{value}</p>
     </div>

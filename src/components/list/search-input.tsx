@@ -22,7 +22,7 @@ export function SearchInput({ placeholder, param = "q" }: { placeholder: string;
   return (
     <label
       className={cn(
-        "flex h-11 w-full items-center gap-2 rounded-xl border border-line bg-white px-3.5 text-muted transition-colors focus-within:border-brand-500 focus-within:ring-4 focus-within:ring-brand-50 sm:w-80",
+        "flex h-11 w-full items-center gap-2 rounded-xl border border-line bg-surface px-3.5 text-muted transition-colors focus-within:border-brand-500 focus-within:ring-4 focus-within:ring-brand-50 sm:w-80",
       )}
     >
       <SearchIcon />

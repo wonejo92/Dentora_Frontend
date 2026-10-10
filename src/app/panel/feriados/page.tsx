@@ -38,7 +38,7 @@ export default async function TimeOffsPage() {
       </div>
 
       {timeOffs.length === 0 ? (
-        <section className="rounded-3xl bg-white px-6 py-16 text-center">
+        <section className="rounded-3xl bg-surface px-6 py-16 text-center">
           <p className="font-semibold">No hay feriados ni vacaciones programados</p>
           <p className="mx-auto mt-1 max-w-md text-sm text-muted">
             Bloquea los feriados para toda la clínica o las vacaciones de un doctor, y la agenda dejará de
@@ -52,10 +52,10 @@ export default async function TimeOffsPage() {
             const days = spanDays(t.startsAt, t.endsAt);
             const ongoing = !isFuture(t.startsAt);
             return (
-              <li key={t.id} className="flex items-start gap-4 rounded-3xl bg-white p-5">
+              <li key={t.id} className="flex items-start gap-4 rounded-3xl bg-surface p-5">
                 <span
                   className="mt-1 size-3 shrink-0 rounded-full"
-                  style={{ backgroundColor: t.doctor?.color ?? "#073b49" }}
+                  style={{ backgroundColor: t.doctor?.color ?? "var(--color-brand-500)" }}
                   aria-hidden
                 />
                 <div className="min-w-0 flex-1">

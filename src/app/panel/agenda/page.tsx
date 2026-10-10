@@ -112,7 +112,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/panel/age
         <div className="mb-4 space-y-2">
           {blocks.map((b) => (
             <div key={b.id} className="flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-              <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: b.doctor?.color ?? "#b45309" }} />
+              <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: b.doctor?.color ?? "var(--color-amber-700)" }} />
               <p>
                 <span className="font-semibold">
                   {b.doctor ? `${b.doctor.fullName} no atiende` : "Clínica cerrada"}
@@ -137,7 +137,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/panel/age
       </div>
 
       {shown.length === 0 ? (
-        <div className="rounded-3xl bg-white px-6 py-14 text-center">
+        <div className="rounded-3xl bg-surface px-6 py-14 text-center">
           <p className="font-semibold">
             {appointments.length === 0 ? "No hay citas este día" : "Ninguna cita coincide con los filtros"}
           </p>
@@ -152,7 +152,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/panel/age
           {shown.map((a) => (
             <li
               key={a.id}
-              className={`grid grid-cols-[56px_4px_minmax(0,1fr)_auto_auto] items-center gap-4 rounded-2xl border border-line bg-white px-4 py-3.5 ${
+              className={`grid grid-cols-[56px_4px_minmax(0,1fr)_auto_auto] items-center gap-4 rounded-2xl border border-line bg-surface px-4 py-3.5 ${
                 a.status === "CANCELLED" ? "opacity-60" : ""
               }`}
             >
@@ -196,7 +196,7 @@ function Stat({
   className?: string;
 }) {
   return (
-    <div className={`rounded-2xl border border-line bg-white px-4 py-3 ${className}`}>
+    <div className={`rounded-2xl border border-line bg-surface px-4 py-3 ${className}`}>
       <p className="text-xs text-muted">{label}</p>
       <p className={`text-2xl font-bold ${highlight ? "text-amber-600" : ""}`}>{value}</p>
     </div>

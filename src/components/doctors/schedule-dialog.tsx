@@ -255,7 +255,7 @@ function TimePill({
     <div
       className={cn(
         "inline-flex items-center rounded-full border py-0.5 pr-0.5 pl-1 transition-colors",
-        invalid ? "border-red-300 bg-red-50" : "border-line bg-white hover:border-brand-200",
+        invalid ? "border-red-300 bg-red-50" : "border-line bg-surface hover:border-brand-200",
       )}
     >
       <TimeSelect

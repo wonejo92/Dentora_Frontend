@@ -41,7 +41,7 @@ export default async function PatientsPage({ searchParams }: PageProps<"/panel/p
 
       <SearchInput placeholder="Nombre, cédula o teléfono" />
 
-      <section className="overflow-hidden rounded-3xl bg-white">
+      <section className="overflow-hidden rounded-3xl bg-surface">
         {items.length === 0 ? (
           <div className="px-6 py-16 text-center">
             <p className="font-semibold">

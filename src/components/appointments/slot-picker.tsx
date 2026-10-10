@@ -113,7 +113,7 @@ export function SlotPicker({
               aria-label="Doctor"
               value={doctorId}
               onChange={(e) => changeDoctor(e.target.value)}
-              className="h-9 rounded-full border border-line bg-white px-3 text-sm focus:border-brand-500 focus:outline-none"
+              className="h-9 rounded-full border border-line bg-surface px-3 text-sm focus:border-brand-500 focus:outline-none"
             >
               <option value="">Cualquier doctor</option>
               {doctors.map((d) => (
@@ -129,7 +129,7 @@ export function SlotPicker({
             min={today}
             value={date}
             onChange={(e) => e.target.value && changeDate(e.target.value)}
-            className="h-9 rounded-full border border-line bg-white px-3 text-sm tabular-nums focus:border-brand-500 focus:outline-none"
+            className="h-9 rounded-full border border-line bg-surface px-3 text-sm tabular-nums focus:border-brand-500 focus:outline-none"
           />
         </div>
       </div>
@@ -148,10 +148,10 @@ export function SlotPicker({
               "flex w-14 shrink-0 flex-col items-center rounded-2xl border py-2 transition-colors",
               d === date
                 ? "border-brand-500 bg-brand-500 text-white"
-                : "border-line bg-white hover:border-brand-200 hover:bg-brand-50",
+                : "border-line bg-surface hover:border-brand-200 hover:bg-brand-50",
             )}
           >
-            <span className={cn("text-[11px] capitalize", d === date ? "text-brand-100" : "text-muted")}>
+            <span className={cn("text-[11px] capitalize", d === date ? "text-white/75" : "text-muted")}>
               {d === today ? "Hoy" : dayLabel(d, { weekday: "short" })}
             </span>
             <span className="text-lg font-bold tabular-nums">{dayLabel(d, { day: "numeric" })}</span>
@@ -237,7 +237,7 @@ export function SlotPicker({
                                   ? "col-span-2 border-brand-500 bg-brand-500 text-white"
                                   : overlaps
                                     ? "border-dashed border-line bg-canvas/60 text-muted/60 hover:border-brand-200"
-                                    : "border-line bg-white hover:border-brand-500 hover:text-brand-600",
+                                    : "border-line bg-surface hover:border-brand-500 hover:text-brand-600",
                               )}
                             >
                               {formatTime(s.startsAt, timeZone)}

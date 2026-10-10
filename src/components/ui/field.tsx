@@ -3,7 +3,7 @@ import { cn } from "@/lib/cn";
 /** Estilo compartido por input, textarea y select. */
 export const controlClass = (error?: string) =>
   cn(
-    "rounded-xl border bg-white px-3.5 text-sm text-ink placeholder:text-muted/70 transition-colors",
+    "rounded-xl border bg-surface px-3.5 text-sm text-ink placeholder:text-muted/70 transition-colors",
     "focus:outline-none focus:ring-4 focus:ring-brand-50 focus:border-brand-500",
     error ? "border-red-400" : "border-line hover:border-brand-200",
   );

@@ -87,7 +87,7 @@ export default async function TreatmentsPage({ searchParams }: PageProps<"/panel
         </div>
       )}
 
-      <section className="overflow-hidden rounded-3xl bg-white">
+      <section className="overflow-hidden rounded-3xl bg-surface">
         {treatments.length > 0 && page.total === 0 ? (
           <div className="px-6 py-16 text-center">
             <p className="font-semibold">Ningún tratamiento coincide</p>

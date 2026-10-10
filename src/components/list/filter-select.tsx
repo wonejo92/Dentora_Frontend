@@ -23,7 +23,7 @@ export function FilterSelect({
   return (
     <label
       className={cn(
-        "flex h-11 items-center gap-1.5 rounded-xl border bg-white pl-3.5 text-sm transition-colors focus-within:ring-4 focus-within:ring-brand-50",
+        "flex h-11 items-center gap-1.5 rounded-xl border bg-surface pl-3.5 text-sm transition-colors focus-within:ring-4 focus-within:ring-brand-50",
         value ? "border-brand-500 text-brand-700" : "border-line text-muted hover:border-brand-200",
       )}
     >

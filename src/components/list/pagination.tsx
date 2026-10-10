@@ -38,7 +38,7 @@ function Arrow({ to, href, label }: { to: keyof typeof icons; href: string | nul
     );
   }
   return (
-    <Link href={href} aria-label={label} className={cn(circle, "border border-line bg-white text-ink hover:border-brand-200 hover:bg-brand-50")}>
+    <Link href={href} aria-label={label} className={cn(circle, "border border-line bg-surface text-ink hover:border-brand-200 hover:bg-brand-50")}>
       {icon}
     </Link>
   );
@@ -95,7 +95,7 @@ export function Pagination({
                 "font-semibold tabular-nums",
                 p === page
                   ? "bg-brand-600 text-white"
-                  : "border border-line bg-white text-ink hover:border-brand-200 hover:bg-brand-50",
+                  : "border border-line bg-surface text-ink hover:border-brand-200 hover:bg-brand-50",
               )}
             >
               {p}

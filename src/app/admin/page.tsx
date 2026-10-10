@@ -3,6 +3,7 @@ import { ClearFilters, FilterSelect } from "@/components/list/filter-select";
 import { Pagination } from "@/components/list/pagination";
 import { SearchInput } from "@/components/list/search-input";
 import { UserMenu } from "@/components/panel/user-menu";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Logo } from "@/components/ui/logo";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
@@ -44,14 +45,17 @@ export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
 
   return (
     <div className="min-h-screen">
-      <header className="flex items-center justify-between border-b border-line bg-white px-4 py-3 sm:px-8">
+      <header className="flex items-center justify-between border-b border-line bg-surface px-4 py-3 sm:px-8">
         <div className="flex items-center gap-3">
           <Logo />
           <span className="rounded-full bg-ink px-2 py-0.5 text-[11px] font-semibold text-white">
             admin
           </span>
         </div>
-        <UserMenu me={me} />
+        <div className="flex items-center gap-2">
+          <ThemeToggle className="bg-canvas" />
+          <UserMenu me={me} />
+        </div>
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-8">
@@ -77,7 +81,7 @@ export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
           <ClearFilters params={["q", "estado", "plan"]} />
         </div>
 
-        <div className="overflow-x-auto rounded-2xl border border-line bg-white">
+        <div className="overflow-x-auto rounded-2xl border border-line bg-surface">
           <table className="w-full min-w-[760px] text-left text-sm">
             <thead className="border-b border-line text-xs text-muted">
               <tr>

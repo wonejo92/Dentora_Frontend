@@ -111,7 +111,7 @@ export function AppointmentActions({ appointment: a, timeZone }: { appointment: 
           ref={menuRef}
           role="menu"
           style={{ top: menu.top, right: menu.right }}
-          className="fixed z-50 w-56 overflow-hidden rounded-2xl border border-line bg-white py-1 text-left shadow-xl shadow-ink/10"
+          className="fixed z-50 w-56 overflow-hidden rounded-2xl border border-line bg-surface py-1 text-left shadow-xl shadow-black/10"
         >
           {items.map((item) => (
             <button
