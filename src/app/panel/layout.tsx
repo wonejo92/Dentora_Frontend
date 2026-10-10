@@ -9,8 +9,10 @@ import {
   SettingsIcon,
   StethoscopeIcon,
   ToothIcon,
+  UserCogIcon,
   UsersIcon,
 } from "@/components/panel/icons";
+import { NewAppointmentDialog } from "@/components/appointments/new-appointment-dialog";
 import { Sidebar, type NavGroup } from "@/components/panel/sidebar";
 import { TrialBanner } from "@/components/panel/trial-banner";
 import { UserMenu } from "@/components/panel/user-menu";
@@ -43,7 +45,10 @@ const groups: NavGroup[] = [
   },
   {
     title: "Configuración",
-    items: [{ href: "/panel/ajustes", label: "Ajustes", icon: <SettingsIcon /> }],
+    items: [
+      { href: "/panel/ajustes/personal", label: "Personal", icon: <UserCogIcon /> },
+      { href: "/panel/ajustes", label: "Ajustes", icon: <SettingsIcon /> },
+    ],
   },
 ];
 
@@ -94,6 +99,15 @@ export default async function PanelLayout({ children }: LayoutProps<"/panel">) {
             </label>
           </form>
           <div className="ml-auto flex items-center gap-2 sm:gap-3">
+            <NewAppointmentDialog
+              timeZone={me.clinic.timezone}
+              triggerLabel="Nueva cita"
+              triggerClassName="flex size-11 items-center justify-center rounded-full bg-brand-500 text-white shadow-md shadow-brand-500/30 transition-colors hover:bg-brand-600"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            </NewAppointmentDialog>
             <UserMenu me={me} logout="mobile" />
             <div className="hidden items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm xl:flex">
               <CalendarIcon />

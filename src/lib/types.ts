@@ -148,3 +148,38 @@ export interface StaffUser {
   isActive: boolean;
   doctor: { id: string } | null;
 }
+
+export interface DoctorSlots {
+  doctor: { id: string; fullName: string };
+  durationMin: number;
+  slots: { startsAt: string; endsAt: string }[];
+}
+
+/** Datos para el formulario de nueva cita. */
+export interface BookingOptions {
+  treatments: Treatment[];
+  doctors: DoctorOption[];
+}
+
+export interface Clinic {
+  id: string;
+  name: string;
+  slug: string;
+  ruc: string | null;
+  email: string | null;
+  phone: string | null;
+  whatsapp: string | null;
+  address: string | null;
+  city: string | null;
+  logoUrl: string | null;
+  primaryColor: string;
+  description: string | null;
+  timezone: string;
+  status: ClinicStatus;
+  plan: "BASIC" | "PRO" | "CLINIC";
+  trialEndsAt: string | null;
+  slotStepMin: number;
+  minBookingNoticeMin: number;
+  maxBookingDaysAhead: number;
+  autoConfirmOnline: boolean;
+}

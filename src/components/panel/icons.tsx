@@ -97,3 +97,16 @@ export const CalendarCheckIcon = () => (
     <path d="M11.5 21H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6M16 3v4M8 3v4M4 11h16M15 19l2 2 4-4" />
   </svg>
 );
+export const UserCogIcon = () => (
+  <svg {...base}>
+    <circle cx="9" cy="7" r="4" />
+    <path d="M3 21v-2a4 4 0 0 1 4-4h4M19 16v-1.5M19 21.5V20M21.6 17.5l-1.3.75M17.7 19.75l-1.3.75M16.4 17.5l1.3.75M20.3 19.75l1.3.75" />
+    <circle cx="19" cy="18" r="2" />
+  </svg>
+);
+export const UserIcon = () => (
+  <svg {...base}>
+    <circle cx="12" cy="8" r="4" />
+    <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
+  </svg>
+);

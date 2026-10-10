@@ -17,8 +17,12 @@ import {
 export type NavItem = { href: string; label: string; icon: React.ReactNode };
 export type NavGroup = { title: string; items: NavItem[] };
 
-const isActive = (pathname: string, href: string) =>
-  href === "/panel" ? pathname === "/panel" : pathname.startsWith(href);
+/** La opción activa es la ruta más larga que coincide (Personal gana a Ajustes en /panel/ajustes/personal). */
+function activeHref(pathname: string, hrefs: string[]) {
+  return hrefs
+    .filter((href) => pathname === href || (href !== "/panel" && pathname.startsWith(`${href}/`)))
+    .sort((a, b) => b.length - a.length)[0];
+}
 
 export function Sidebar({
   groups,
@@ -33,6 +37,8 @@ export function Sidebar({
 }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(initialCollapsed);
+  const current = activeHref(pathname, groups.flatMap((g) => g.items.map((i) => i.href)));
+  const isActive = (href: string) => href === current;
 
   const toggle = () => setCollapsed((c) => !c);
 
@@ -100,7 +106,7 @@ export function Sidebar({
                 <ul className={cn("space-y-1", collapsed && "flex flex-col items-center")}>
                   {group.items.map((item) => (
                     <li key={item.href}>
-                      <NavLink item={item} active={isActive(pathname, item.href)} collapsed={collapsed} />
+                      <NavLink item={item} active={isActive(item.href)} collapsed={collapsed} />
                     </li>
                   ))}
                 </ul>
@@ -121,7 +127,7 @@ export function Sidebar({
         </div>
         <nav aria-label="Menú principal" className="flex gap-1 overflow-x-auto px-4 py-3">
           {groups.flatMap((g) => g.items).map((item) => {
-            const active = isActive(pathname, item.href);
+            const active = isActive(item.href);
             return (
               <Link
                 key={item.href}

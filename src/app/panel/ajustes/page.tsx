@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
-import { ComingSoon } from "@/components/panel/coming-soon";
+import { ClinicForm } from "@/components/settings/clinic-form";
+import { api } from "@/lib/api";
+import { guard, requireClinicUser } from "@/lib/dal";
+import type { Clinic } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Ajustes" };
 
-export default function Page() {
-  return (
-    <ComingSoon
-      title="Ajustes"
-      description="Datos de la clínica, logo, colores, reglas de la agenda y personal."
-    />
-  );
+export default async function ClinicSettingsPage() {
+  const me = await requireClinicUser();
+  if (me.role !== "OWNER") return null;
+  const clinic = await guard(api<Clinic>("/clinic"));
+  return <ClinicForm clinic={clinic} />;
 }
