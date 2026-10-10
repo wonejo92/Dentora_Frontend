@@ -1,27 +1,48 @@
 import type { Metadata } from "next";
+import { ClearFilters, FilterSelect } from "@/components/list/filter-select";
+import { Pagination } from "@/components/list/pagination";
+import { SearchInput } from "@/components/list/search-input";
 import { TreatmentDialog } from "@/components/treatments/treatment-dialog";
 import { buttonClass } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { guard, requireClinicUser } from "@/lib/dal";
 import { formatDuration, formatPrice } from "@/lib/format";
+import { matches, pageParam, pageSizeParam, paginate, param } from "@/lib/list";
 import type { DoctorOption, Treatment } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Tratamientos" };
 
-export default async function TreatmentsPage() {
+const DEFAULT_SIZE = 10;
+
+export default async function TreatmentsPage({ searchParams }: PageProps<"/panel/tratamientos">) {
   const me = await requireClinicUser();
   const canEdit = me.role === "OWNER";
+  const params = await searchParams;
   const [treatments, doctors] = await Promise.all([
     guard(api<Treatment[]>("/treatments")),
-    canEdit ? guard(api<DoctorOption[]>("/doctors")) : Promise.resolve([]),
+    guard(api<DoctorOption[]>("/doctors")),
   ]);
-  // Activos primero; dentro de cada grupo, el orden alfabético del backend.
-  const sorted = [...treatments].sort((a, b) => Number(b.isActive) - Number(a.isActive));
   const activeCount = treatments.filter((t) => t.isActive).length;
 
+  const q = param(params, "q");
+  const estado = param(params, "estado");
+  const web = param(params, "web");
+  const doctor = param(params, "doctor");
+  const filtered = treatments
+    .filter((t) => matches(q, t.name, t.description))
+    .filter((t) => !estado || (estado === "activos" ? t.isActive : !t.isActive))
+    .filter((t) => !web || (web === "reservable" ? t.isPublic : !t.isPublic))
+    .filter((t) =>
+      !doctor ? true : doctor === "ninguno" ? t.doctors.length === 0 : t.doctors.some((d) => d.id === doctor),
+    )
+    // Activos primero; dentro de cada grupo, el orden alfabético del backend.
+    .sort((a, b) => Number(b.isActive) - Number(a.isActive));
+  const size = pageSizeParam(params, DEFAULT_SIZE);
+  const page = paginate(filtered, pageParam(params), size);
+
   return (
-    <div className="mx-auto max-w-6xl space-y-4">
+    <div className="w-full space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Tratamientos</h1>
@@ -35,8 +56,44 @@ export default async function TreatmentsPage() {
         )}
       </div>
 
+      {treatments.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <SearchInput placeholder="Buscar tratamiento" />
+          <FilterSelect
+            param="estado"
+            label="Estado"
+            options={[
+              { value: "activos", label: "Activos" },
+              { value: "inactivos", label: "Inactivos" },
+            ]}
+          />
+          <FilterSelect
+            param="web"
+            label="Web"
+            options={[
+              { value: "reservable", label: "Reservable" },
+              { value: "panel", label: "Solo panel" },
+            ]}
+          />
+          <FilterSelect
+            param="doctor"
+            label="Doctor"
+            options={[
+              ...doctors.map((d) => ({ value: d.id, label: d.fullName })),
+              { value: "ninguno", label: "Sin doctor asignado" },
+            ]}
+          />
+          <ClearFilters params={["q", "estado", "web", "doctor"]} />
+        </div>
+      )}
+
       <section className="overflow-hidden rounded-3xl bg-white">
-        {treatments.length === 0 ? (
+        {treatments.length > 0 && page.total === 0 ? (
+          <div className="px-6 py-16 text-center">
+            <p className="font-semibold">Ningún tratamiento coincide</p>
+            <p className="mt-1 text-sm text-muted">Prueba con otra búsqueda o quita algún filtro.</p>
+          </div>
+        ) : treatments.length === 0 ? (
           <div className="px-6 py-16 text-center">
             <p className="font-semibold">Agrega tu primer tratamiento</p>
             <p className="mx-auto mt-1 max-w-md text-sm text-muted">
@@ -58,7 +115,7 @@ export default async function TreatmentsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
-                {sorted.map((t) => (
+                {page.items.map((t) => (
                   <tr key={t.id} className={cn(!t.isActive && "bg-canvas/50")}>
                     <td className="max-w-xs px-6 py-4">
                       <p className={cn("font-semibold", !t.isActive && "text-muted")}>
@@ -111,6 +168,15 @@ export default async function TreatmentsPage() {
           </div>
         )}
       </section>
+
+      <Pagination
+        info={page}
+        pathname="/panel/tratamientos"
+        params={params}
+        noun="tratamientos"
+        size={size}
+        defaultSize={DEFAULT_SIZE}
+      />
 
       <p className="text-xs text-muted">
         Un tratamiento sin doctor asignado no aparece en la agenda ni en la web. Asígnalo con

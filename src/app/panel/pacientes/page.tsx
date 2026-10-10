@@ -1,35 +1,29 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { SearchIcon } from "@/components/panel/icons";
-import { buttonClass } from "@/components/ui/button";
+import { Pagination } from "@/components/list/pagination";
+import { SearchInput } from "@/components/list/search-input";
 import { api } from "@/lib/api";
 import { guard, requireClinicUser } from "@/lib/dal";
 import { initials } from "@/lib/labels";
+import { pageInfo, pageParam, pageSizeParam, param } from "@/lib/list";
 import type { Paginated, Patient } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Pacientes" };
 
-const PAGE_SIZE = 20;
+const DEFAULT_SIZE = 20;
 
 export default async function PatientsPage({ searchParams }: PageProps<"/panel/pacientes">) {
   await requireClinicUser();
   const params = await searchParams;
-  const q = typeof params.q === "string" ? params.q.trim() : "";
-  const page = Math.max(1, Number(params.pagina) || 1);
+  const q = param(params, "q");
+  const size = pageSizeParam(params, DEFAULT_SIZE);
+  const page = pageParam(params);
 
-  const query = new URLSearchParams({ page: String(page), limit: String(PAGE_SIZE) });
+  const query = new URLSearchParams({ page: String(page), limit: String(size) });
   if (q) query.set("q", q);
   const { items, total } = await guard(api<Paginated<Patient>>(`/patients?${query}`));
-  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-
-  const pageHref = (p: number) => {
-    const next = new URLSearchParams({ pagina: String(p) });
-    if (q) next.set("q", q);
-    return `/panel/pacientes?${next}`;
-  };
 
   return (
-    <div className="mx-auto max-w-6xl space-y-4">
+    <div className="w-full space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Pacientes</h1>
@@ -39,24 +33,15 @@ export default async function PatientsPage({ searchParams }: PageProps<"/panel/p
               : `${total} ${total === 1 ? "paciente registrado" : "pacientes registrados"}`}
           </p>
         </div>
-        <form role="search" className="w-full sm:w-80">
-          <label className="flex items-center gap-2 rounded-xl border border-line bg-white px-3.5 py-2.5 text-muted focus-within:border-brand-500 focus-within:ring-4 focus-within:ring-brand-50">
-            <SearchIcon />
-            <span className="sr-only">Buscar paciente</span>
-            <input
-              name="q"
-              defaultValue={q}
-              placeholder="Nombre, cédula o teléfono"
-              className="w-full bg-transparent text-sm text-ink placeholder:text-muted/70 focus:outline-none"
-            />
-          </label>
-        </form>
+        <SearchInput placeholder="Nombre, cédula o teléfono" />
       </div>
 
       <section className="overflow-hidden rounded-3xl bg-white">
         {items.length === 0 ? (
           <div className="px-6 py-16 text-center">
-            <p className="font-semibold">{q ? "Sin resultados" : "Aún no hay pacientes"}</p>
+            <p className="font-semibold">
+              {total > 0 ? "Esta página no tiene resultados" : q ? "Sin resultados" : "Aún no hay pacientes"}
+            </p>
             <p className="mt-1 text-sm text-muted">
               {q
                 ? "Prueba con otro nombre, la cédula o el teléfono. No hace falta escribir tildes."
@@ -101,25 +86,14 @@ export default async function PatientsPage({ searchParams }: PageProps<"/panel/p
         )}
       </section>
 
-      {pages > 1 && (
-        <nav aria-label="Páginas" className="flex items-center justify-between text-sm text-muted">
-          <span>
-            Página {page} de {pages}
-          </span>
-          <div className="flex gap-2">
-            {page > 1 && (
-              <Link href={pageHref(page - 1)} className={buttonClass("secondary")}>
-                Anterior
-              </Link>
-            )}
-            {page < pages && (
-              <Link href={pageHref(page + 1)} className={buttonClass("secondary")}>
-                Siguiente
-              </Link>
-            )}
-          </div>
-        </nav>
-      )}
+      <Pagination
+        info={pageInfo(total, page, size)}
+        pathname="/panel/pacientes"
+        params={params}
+        noun="pacientes"
+        size={size}
+        defaultSize={DEFAULT_SIZE}
+      />
     </div>
   );
 }

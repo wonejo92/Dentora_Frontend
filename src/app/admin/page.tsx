@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
+import { ClearFilters, FilterSelect } from "@/components/list/filter-select";
+import { Pagination } from "@/components/list/pagination";
+import { SearchInput } from "@/components/list/search-input";
 import { UserMenu } from "@/components/panel/user-menu";
 import { Logo } from "@/components/ui/logo";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { guard, requireSuperAdmin } from "@/lib/dal";
+import { matches, pageParam, pageSizeParam, paginate, param } from "@/lib/list";
 import type { AdminClinic, ClinicStatus } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Clínicas" };
@@ -21,9 +25,22 @@ const dateFormat = new Intl.DateTimeFormat("es-EC", {
   timeZone: "America/Guayaquil",
 });
 
-export default async function AdminPage() {
+const DEFAULT_SIZE = 20;
+
+export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
   const me = await requireSuperAdmin();
+  const params = await searchParams;
   const clinics = await guard(api<AdminClinic[]>("/admin/clinics"));
+
+  const q = param(params, "q");
+  const estado = param(params, "estado");
+  const plan = param(params, "plan");
+  const filtered = clinics
+    .filter((c) => matches(q, c.name, c.city, c.email, c.slug))
+    .filter((c) => !estado || c.status === estado)
+    .filter((c) => !plan || c.plan === plan);
+  const size = pageSizeParam(params, DEFAULT_SIZE);
+  const page = paginate(filtered, pageParam(params), size);
 
   return (
     <div className="min-h-screen">
@@ -41,6 +58,25 @@ export default async function AdminPage() {
         <h1 className="text-2xl font-bold tracking-tight">Clínicas</h1>
         <p className="mt-1 mb-6 text-sm text-muted">{clinics.length} registradas</p>
 
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <SearchInput placeholder="Clínica, ciudad o correo" />
+          <FilterSelect
+            param="estado"
+            label="Estado"
+            options={Object.entries(statusStyles).map(([value, { label }]) => ({ value, label }))}
+          />
+          <FilterSelect
+            param="plan"
+            label="Plan"
+            options={[
+              { value: "BASIC", label: "Básico" },
+              { value: "PRO", label: "Pro" },
+              { value: "CLINIC", label: "Clínica" },
+            ]}
+          />
+          <ClearFilters params={["q", "estado", "plan"]} />
+        </div>
+
         <div className="overflow-x-auto rounded-2xl border border-line bg-white">
           <table className="w-full min-w-[760px] text-left text-sm">
             <thead className="border-b border-line text-xs text-muted">
@@ -55,7 +91,14 @@ export default async function AdminPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
-              {clinics.map((c) => {
+              {page.items.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-4 py-12 text-center text-muted">
+                    Ninguna clínica coincide con la búsqueda.
+                  </td>
+                </tr>
+              )}
+              {page.items.map((c) => {
                 const status = statusStyles[c.status];
                 return (
                   <tr key={c.id}>
@@ -86,6 +129,17 @@ export default async function AdminPage() {
               })}
             </tbody>
           </table>
+        </div>
+
+        <div className="mt-4">
+          <Pagination
+            info={page}
+            pathname="/admin"
+            params={params}
+            noun="clínicas"
+            size={size}
+            defaultSize={DEFAULT_SIZE}
+          />
         </div>
       </main>
     </div>

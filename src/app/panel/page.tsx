@@ -31,7 +31,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/panel"
   const { month } = data;
 
   return (
-    <div className="mx-auto max-w-6xl space-y-4">
+    <div className="w-full space-y-4">
       {bienvenida && (
         <Alert tone="info">
           ¡Bienvenido a Dentora! Empieza agregando tus tratamientos y doctores para abrir la

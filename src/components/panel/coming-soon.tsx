@@ -1,6 +1,6 @@
 export function ComingSoon({ title, description }: { title: string; description: string }) {
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="w-full">
       <h1 className="mb-6 text-2xl font-bold tracking-tight">{title}</h1>
       <div className="rounded-3xl bg-white px-6 py-14 text-center">
         <p className="font-semibold">Esta sección llega en la siguiente fase</p>

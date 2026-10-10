@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { DateInput } from "@/components/list/date-input";
+import { ClearFilters, FilterSelect } from "@/components/list/filter-select";
 import { ChevronLeftIcon, ChevronRightIcon } from "@/components/panel/icons";
 import { buttonClass } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { api } from "@/lib/api";
 import { guard, requireClinicUser } from "@/lib/dal";
+import { hrefWith, param } from "@/lib/list";
 import {
   addDays,
   formatLongDate,
@@ -13,28 +16,45 @@ import {
   localDate,
   startOfLocalDay,
 } from "@/lib/time";
-import type { Appointment } from "@/lib/types";
+import type { Appointment, AppointmentStatus, DoctorOption } from "@/lib/types";
+
+const STATUS_OPTIONS: { value: AppointmentStatus; label: string }[] = [
+  { value: "PENDING", label: "Pendientes" },
+  { value: "CONFIRMED", label: "Confirmadas" },
+  { value: "COMPLETED", label: "Atendidas" },
+  { value: "NO_SHOW", label: "No asistió" },
+  { value: "CANCELLED", label: "Canceladas" },
+];
 
 export const metadata: Metadata = { title: "Agenda" };
 
 export default async function AgendaPage({ searchParams }: PageProps<"/panel/agenda">) {
   const me = await requireClinicUser();
   const tz = me.clinic.timezone;
-  const { fecha } = await searchParams;
+  const params = await searchParams;
+  const fecha = param(params, "fecha");
+  const doctor = param(params, "doctor");
+  const estado = param(params, "estado");
 
   const today = localDate(new Date(), tz);
   const date = isValidDate(fecha) ? fecha : today;
   const from = startOfLocalDay(date, tz).toISOString();
   const to = startOfLocalDay(addDays(date, 1), tz).toISOString();
 
-  const appointments = await guard(
-    api<Appointment[]>(`/appointments?from=${from}&to=${to}`),
-  );
+  const [appointments, doctors] = await Promise.all([
+    guard(api<Appointment[]>(`/appointments?from=${from}&to=${to}`)),
+    guard(api<DoctorOption[]>("/doctors")),
+  ]);
+  // Los contadores son del día completo; los filtros solo afectan a la lista.
   const active = appointments.filter((a) => a.status !== "CANCELLED");
   const pending = appointments.filter((a) => a.status === "PENDING").length;
+  const shown = appointments.filter(
+    (a) => (!doctor || a.doctor.id === doctor) && (!estado || a.status === estado),
+  );
+  const dayHref = (d: string | null) => hrefWith("/panel/agenda", params, { fecha: d });
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="w-full">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-sm text-muted">{formatLongDate(date)}</p>
@@ -44,24 +64,25 @@ export default async function AgendaPage({ searchParams }: PageProps<"/panel/age
         </div>
         <nav aria-label="Cambiar de día" className="flex items-center gap-2">
           <Link
-            href={`/panel/agenda?fecha=${addDays(date, -1)}`}
+            href={dayHref(addDays(date, -1))}
             aria-label="Día anterior"
             className={buttonClass("secondary", "px-2.5")}
           >
             <ChevronLeftIcon />
           </Link>
           {date !== today && (
-            <Link href="/panel/agenda" className={buttonClass("secondary")}>
+            <Link href={dayHref(null)} className={buttonClass("secondary")}>
               Hoy
             </Link>
           )}
           <Link
-            href={`/panel/agenda?fecha=${addDays(date, 1)}`}
+            href={dayHref(addDays(date, 1))}
             aria-label="Día siguiente"
             className={buttonClass("secondary", "px-2.5")}
           >
             <ChevronRightIcon />
           </Link>
+          <DateInput value={date} label="Ir a una fecha" />
         </nav>
       </div>
 
@@ -75,16 +96,30 @@ export default async function AgendaPage({ searchParams }: PageProps<"/panel/age
         />
       </div>
 
-      {appointments.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-line bg-white px-6 py-14 text-center">
-          <p className="font-semibold">No hay citas este día</p>
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <FilterSelect
+          param="doctor"
+          label="Doctor"
+          options={doctors.map((d) => ({ value: d.id, label: d.fullName }))}
+        />
+        <FilterSelect param="estado" label="Estado" options={STATUS_OPTIONS} />
+        <ClearFilters params={["doctor", "estado"]} />
+      </div>
+
+      {shown.length === 0 ? (
+        <div className="rounded-3xl bg-white px-6 py-14 text-center">
+          <p className="font-semibold">
+            {appointments.length === 0 ? "No hay citas este día" : "Ninguna cita coincide con los filtros"}
+          </p>
           <p className="mt-1 text-sm text-muted">
-            Las reservas online y las que agende la recepción aparecerán aquí.
+            {appointments.length === 0
+              ? "Las reservas online y las que agende la recepción aparecerán aquí."
+              : "Quita algún filtro para ver todas las citas del día."}
           </p>
         </div>
       ) : (
         <ul className="space-y-2.5">
-          {appointments.map((a) => (
+          {shown.map((a) => (
             <li
               key={a.id}
               className={`grid grid-cols-[56px_4px_minmax(0,1fr)_auto] items-center gap-4 rounded-2xl border border-line bg-white px-4 py-3.5 ${
