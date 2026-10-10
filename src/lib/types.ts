@@ -183,3 +183,12 @@ export interface Clinic {
   maxBookingDaysAhead: number;
   autoConfirmOnline: boolean;
 }
+
+export interface TimeOff {
+  id: string;
+  doctorId: string | null;
+  startsAt: string;
+  endsAt: string;
+  reason: string | null;
+  doctor: { id: string; fullName: string; color: string } | null;
+}

@@ -12,13 +12,14 @@ import { guard, requireClinicUser } from "@/lib/dal";
 import { hrefWith, param } from "@/lib/list";
 import {
   addDays,
+  describeRange,
   formatLongDate,
   formatTime,
   isValidDate,
   localDate,
   startOfLocalDay,
 } from "@/lib/time";
-import type { Appointment, AppointmentStatus, DoctorOption } from "@/lib/types";
+import type { Appointment, AppointmentStatus, DoctorOption, TimeOff } from "@/lib/types";
 
 const STATUS_OPTIONS: { value: AppointmentStatus; label: string }[] = [
   { value: "PENDING", label: "Pendientes" },
@@ -43,10 +44,12 @@ export default async function AgendaPage({ searchParams }: PageProps<"/panel/age
   const from = startOfLocalDay(date, tz).toISOString();
   const to = startOfLocalDay(addDays(date, 1), tz).toISOString();
 
-  const [appointments, doctors] = await Promise.all([
+  const [appointments, doctors, timeOffs] = await Promise.all([
     guard(api<Appointment[]>(`/appointments?from=${from}&to=${to}`)),
     guard(api<DoctorOption[]>("/doctors")),
+    guard(api<TimeOff[]>("/time-offs")),
   ]);
+  const blocks = timeOffs.filter((t) => t.startsAt < to && t.endsAt > from);
   // Los contadores son del día completo; los filtros solo afectan a la lista.
   const active = appointments.filter((a) => a.status !== "CANCELLED");
   const pending = appointments.filter((a) => a.status === "PENDING").length;
@@ -104,6 +107,24 @@ export default async function AgendaPage({ searchParams }: PageProps<"/panel/age
           className="hidden sm:block"
         />
       </div>
+
+      {blocks.length > 0 && (
+        <div className="mb-4 space-y-2">
+          {blocks.map((b) => (
+            <div key={b.id} className="flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: b.doctor?.color ?? "#b45309" }} />
+              <p>
+                <span className="font-semibold">
+                  {b.doctor ? `${b.doctor.fullName} no atiende` : "Clínica cerrada"}
+                </span>
+                {" · "}
+                {describeRange(b.startsAt, b.endsAt, tz).label}
+                {b.reason && ` · ${b.reason}`}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <FilterSelect

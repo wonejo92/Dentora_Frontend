@@ -64,3 +64,35 @@ export function calendarDaysUntil(iso: string, timeZone: string) {
 
 /** ¿El instante `iso` todavía no ha pasado? */
 export const isFuture = (iso: string) => Date.parse(iso) >= Date.now();
+
+/**
+ * Describe un bloqueo en lenguaje natural:
+ * "lun 2 nov – mar 3 nov" (días completos) o "sáb 10 oct · 14:00 – 18:00" (unas horas).
+ */
+export function describeRange(startsAt: string, endsAt: string, timeZone: string) {
+  const start = new Date(startsAt);
+  const end = new Date(endsAt);
+  const day = (d: Date) =>
+    new Intl.DateTimeFormat("es-EC", { timeZone, weekday: "short", day: "numeric", month: "short" })
+      .format(d)
+      .replaceAll(".", "")
+      .replace(",", "");
+  const isMidnight = (d: Date) => formatTime(d.toISOString(), timeZone) === "00:00";
+
+  if (isMidnight(start) && isMidnight(end)) {
+    const lastDay = new Date(end.getTime() - 1);
+    const sameDay = localDate(start, timeZone) === localDate(lastDay, timeZone);
+    return { label: sameDay ? day(start) : `${day(start)} – ${day(lastDay)}`, fullDay: true };
+  }
+  const sameDay = localDate(start, timeZone) === localDate(end, timeZone);
+  return {
+    label: sameDay
+      ? `${day(start)} · ${formatTime(startsAt, timeZone)} – ${formatTime(endsAt, timeZone)}`
+      : `${day(start)} ${formatTime(startsAt, timeZone)} – ${day(end)} ${formatTime(endsAt, timeZone)}`,
+    fullDay: false,
+  };
+}
+
+/** Días completos que abarca un rango (para "3 días"). */
+export const spanDays = (startsAt: string, endsAt: string) =>
+  Math.round((Date.parse(endsAt) - Date.parse(startsAt)) / 864e5);
