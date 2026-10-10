@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DoctorDialog } from "@/components/doctors/doctor-dialog";
 import { ClearFilters, FilterSelect } from "@/components/list/filter-select";
+import { ClockIcon, UserIcon } from "@/components/panel/icons";
 import { Pagination } from "@/components/list/pagination";
 import { SearchInput } from "@/components/list/search-input";
 import { ScheduleDialog } from "@/components/doctors/schedule-dialog";
@@ -157,14 +158,16 @@ export default async function DoctorsPage({ searchParams }: PageProps<"/panel/do
                 {canEdit && (
                   <div className="mt-5 grid grid-cols-2 gap-2 border-t border-line pt-4">
                     <ScheduleDialog doctor={d} triggerClassName={buttonClass("secondary", "h-9 px-3")}>
+                      <ClockIcon />
                       Horario
                     </ScheduleDialog>
                     <DoctorDialog
                       doctor={d}
                       treatments={treatments}
                       users={users}
-                      triggerClassName={buttonClass("ghost", "h-9 px-3")}
+                      triggerClassName={buttonClass("secondary", "h-9 px-3")}
                     >
+                      <UserIcon />
                       Perfil
                     </DoctorDialog>
                   </div>
