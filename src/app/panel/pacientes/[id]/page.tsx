@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AppointmentActions } from "@/components/appointments/appointment-actions";
+import { NewAppointmentDialog } from "@/components/appointments/new-appointment-dialog";
 import { ChevronLeftIcon } from "@/components/panel/icons";
 import { PatientDialog } from "@/components/patients/patient-dialog";
 import { buttonClass } from "@/components/ui/button";
@@ -87,9 +89,17 @@ export default async function PatientPage({ params }: PageProps<"/panel/paciente
               WhatsApp
             </a>
           )}
-          <PatientDialog patient={p} triggerClassName={buttonClass("primary")}>
+          <PatientDialog patient={p} triggerClassName={buttonClass("secondary")}>
             Editar
           </PatientDialog>
+          <NewAppointmentDialog
+            timeZone={tz}
+            patient={p}
+            afterCreate="stay"
+            triggerClassName={buttonClass("primary")}
+          >
+            + Agendar cita
+          </NewAppointmentDialog>
         </div>
       </section>
 
@@ -159,7 +169,8 @@ export default async function PatientPage({ params }: PageProps<"/panel/paciente
                       <th className="px-4 py-2.5 font-medium">Tratamiento</th>
                       <th className="px-4 py-2.5 font-medium">Doctor</th>
                       <th className="px-4 py-2.5 font-medium">Origen</th>
-                      <th className="px-6 py-2.5 font-medium">Estado</th>
+                      <th className="px-4 py-2.5 font-medium">Estado</th>
+                      <th className="w-px px-6 py-2.5" />
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-line">
@@ -182,8 +193,11 @@ export default async function PatientPage({ params }: PageProps<"/panel/paciente
                           </span>
                         </td>
                         <td className="px-4 py-3 text-muted">{a.source === "ONLINE" ? "Online" : "Panel"}</td>
-                        <td className="px-6 py-3">
+                        <td className="px-4 py-3">
                           <StatusBadge status={a.status} />
+                        </td>
+                        <td className="px-6 py-3 text-right">
+                          <AppointmentActions appointment={a} timeZone={tz} />
                         </td>
                       </tr>
                     ))}

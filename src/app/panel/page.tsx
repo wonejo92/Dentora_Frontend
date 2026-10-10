@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { confirmAppointment } from "@/app/actions/appointments";
+import { AppointmentActions } from "@/components/appointments/appointment-actions";
 import {
   CalendarCheckIcon,
   ClockIcon,
@@ -111,6 +112,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/panel"
                   <th className="py-2 pr-4 font-medium">Tratamiento</th>
                   <th className="py-2 pr-4 font-medium">Doctor</th>
                   <th className="py-2 font-medium">Estado</th>
+                  <th className="w-px py-2" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
@@ -129,6 +131,9 @@ export default async function DashboardPage({ searchParams }: PageProps<"/panel"
                     </td>
                     <td className="py-3">
                       <StatusBadge status={a.status} />
+                    </td>
+                    <td className="py-3 text-right">
+                      <AppointmentActions appointment={a} timeZone={tz} />
                     </td>
                   </tr>
                 ))}

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AppointmentActions } from "@/components/appointments/appointment-actions";
+import { NewAppointmentDialog } from "@/components/appointments/new-appointment-dialog";
 import { DateInput } from "@/components/list/date-input";
 import { ClearFilters, FilterSelect } from "@/components/list/filter-select";
 import { ChevronLeftIcon, ChevronRightIcon } from "@/components/panel/icons";
@@ -83,6 +85,13 @@ export default async function AgendaPage({ searchParams }: PageProps<"/panel/age
             <ChevronRightIcon />
           </Link>
           <DateInput value={date} label="Ir a una fecha" />
+          <NewAppointmentDialog
+            timeZone={tz}
+            initialDate={date}
+            triggerClassName={buttonClass("primary", "ml-2")}
+          >
+            + Nueva cita
+          </NewAppointmentDialog>
         </nav>
       </div>
 
@@ -122,7 +131,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/panel/age
           {shown.map((a) => (
             <li
               key={a.id}
-              className={`grid grid-cols-[56px_4px_minmax(0,1fr)_auto] items-center gap-4 rounded-2xl border border-line bg-white px-4 py-3.5 ${
+              className={`grid grid-cols-[56px_4px_minmax(0,1fr)_auto_auto] items-center gap-4 rounded-2xl border border-line bg-white px-4 py-3.5 ${
                 a.status === "CANCELLED" ? "opacity-60" : ""
               }`}
             >
@@ -145,6 +154,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/panel/age
                 </p>
               </div>
               <StatusBadge status={a.status} />
+              <AppointmentActions appointment={a} timeZone={tz} />
             </li>
           ))}
         </ul>

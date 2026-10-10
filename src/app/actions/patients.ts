@@ -5,7 +5,7 @@ import { api, ApiError } from "@/lib/api";
 import { guard } from "@/lib/dal";
 import type { Patient } from "@/lib/types";
 
-export type PatientFormState = { ok?: boolean; id?: string; error?: string };
+export type PatientFormState = { ok?: boolean; id?: string; patient?: Patient; error?: string };
 
 export async function savePatient(
   _prev: PatientFormState,
@@ -56,5 +56,5 @@ export async function savePatient(
   }
 
   revalidatePath("/panel/pacientes", "layout");
-  return { ok: true, id: patient.id };
+  return { ok: true, id: patient.id, patient };
 }
