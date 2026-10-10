@@ -92,3 +92,23 @@ export interface Paginated<T> {
   page: number;
   limit: number;
 }
+
+export interface Treatment {
+  id: string;
+  name: string;
+  description: string | null;
+  durationMin: number;
+  /** Decimal serializado como texto, por ejemplo "35" o "35.5". */
+  price: string | null;
+  isPublic: boolean;
+  isActive: boolean;
+  doctors: { id: string; fullName: string }[];
+}
+
+export interface DoctorOption {
+  id: string;
+  fullName: string;
+  specialty: string | null;
+  color: string;
+  isActive: boolean;
+}
