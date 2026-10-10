@@ -1,11 +1,12 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import { saveDoctor, type FormState } from "@/app/actions/doctors";
-import { Alert } from "@/components/ui/alert";
+import { FormError } from "@/components/ui/form-error";
 import { Button } from "@/components/ui/button";
 import { Field, Select, Switch, TextArea } from "@/components/ui/field";
 import { Modal } from "@/components/ui/modal";
+import { useFormAction } from "@/components/ui/use-form-action";
 import { formatDuration } from "@/lib/format";
 import { roleLabels } from "@/lib/labels";
 import { DOCTOR_COLORS } from "@/lib/schedule";
@@ -44,7 +45,7 @@ function DoctorForm({
   users,
   onDone,
 }: Omit<Props, "triggerClassName" | "children"> & { onDone: () => void }) {
-  const [state, action, pending] = useActionState<FormState, FormData>(async (prev, formData) => {
+  const { state, pending, onSubmit } = useFormAction<FormState>(async (prev, formData) => {
     const result = await saveDoctor(prev, formData);
     if (result.ok) onDone();
     return result;
@@ -57,8 +58,8 @@ function DoctorForm({
   const userOptions = users.filter((u) => u.isActive && (!u.doctor || u.doctor.id === d?.id));
 
   return (
-    <form action={action} className="space-y-4">
-      {state.error && <Alert>{state.error}</Alert>}
+    <form onSubmit={onSubmit} className="space-y-4">
+      <FormError message={state.error} />
       {d && <input type="hidden" name="id" value={d.id} />}
 
       <Field

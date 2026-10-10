@@ -1,11 +1,12 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import { saveTreatment, type FormState } from "@/app/actions/treatments";
-import { Alert } from "@/components/ui/alert";
+import { FormError } from "@/components/ui/form-error";
 import { Button } from "@/components/ui/button";
 import { Field, Select, Switch, TextArea } from "@/components/ui/field";
 import { Modal } from "@/components/ui/modal";
+import { useFormAction } from "@/components/ui/use-form-action";
 import { formatDuration } from "@/lib/format";
 import type { DoctorOption, Treatment } from "@/lib/types";
 
@@ -53,7 +54,7 @@ function TreatmentForm({
   const assigned = new Set(t?.doctors.map((d) => d.id));
   // Los inactivos solo se muestran si ya estaban asignados.
   const options = doctors.filter((d) => d.isActive || assigned.has(d.id));
-  const [state, action, pending] = useActionState<FormState, FormData>(async (prev, formData) => {
+  const { state, pending, onSubmit } = useFormAction<FormState>(async (prev, formData) => {
     const result = await saveTreatment(prev, formData);
     if (result.ok) onDone();
     return result;
@@ -65,8 +66,8 @@ function TreatmentForm({
       : DURATIONS;
 
   return (
-    <form action={action} className="space-y-4">
-      {state.error && <Alert>{state.error}</Alert>}
+    <form onSubmit={onSubmit} className="space-y-4">
+      <FormError message={state.error} />
       {t && <input type="hidden" name="id" value={t.id} />}
 
       <Field
