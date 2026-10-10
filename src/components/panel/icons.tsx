@@ -56,3 +56,44 @@ export const LogoutIcon = () => (
     <path d="M14 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-2M9 12h12l-3-3m0 6 3-3" />
   </svg>
 );
+export const DashboardIcon = () => (
+  <svg {...base}>
+    <rect x="4" y="4" width="6" height="8" rx="1.5" />
+    <rect x="4" y="16" width="6" height="4" rx="1.5" />
+    <rect x="14" y="12" width="6" height="8" rx="1.5" />
+    <rect x="14" y="4" width="6" height="4" rx="1.5" />
+  </svg>
+);
+export const ChartIcon = () => (
+  <svg {...base}>
+    <path d="M3 21h18M7 17V11M12 17V7M17 17v-4" />
+  </svg>
+);
+export const SearchIcon = () => (
+  <svg {...base}>
+    <circle cx="10" cy="10" r="7" />
+    <path d="m21 21-6-6" />
+  </svg>
+);
+export const BellIcon = () => (
+  <svg {...base}>
+    <path d="M10 5a2 2 0 1 1 4 0 7 7 0 0 1 4 6v3a4 4 0 0 0 2 3H4a4 4 0 0 0 2-3v-3a7 7 0 0 1 4-6M9 17v1a3 3 0 0 0 6 0v-1" />
+  </svg>
+);
+export const ClockIcon = () => (
+  <svg {...base}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7v5l3 3" />
+  </svg>
+);
+export const WorldIcon = () => (
+  <svg {...base}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M3.6 9h16.8M3.6 15h16.8M11.5 3a17 17 0 0 0 0 18M12.5 3a17 17 0 0 1 0 18" />
+  </svg>
+);
+export const CalendarCheckIcon = () => (
+  <svg {...base}>
+    <path d="M11.5 21H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6M16 3v4M8 3v4M4 11h16M15 19l2 2 4-4" />
+  </svg>
+);

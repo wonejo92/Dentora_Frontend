@@ -12,7 +12,17 @@
   --color-ink: #0f2a33;
   --color-muted: #5b7580;
   --color-line: #e3ecef;
-  --color-canvas: #f7fafb;
+  --color-canvas: #f3f7f8;
+
+  /* Menú lateral oscuro */
+  --color-night-900: #073b49;
+  --color-night-800: #11586b;
+  --color-night-700: #1b5867;
+  --color-night-300: #7fb0bc;
+  --color-night-200: #b9d7de;
+
+  /* Acento cálido (líneas de promedio, detalles) */
+  --color-warm-500: #c8693f;
 
   --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
 }
