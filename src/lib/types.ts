@@ -192,3 +192,45 @@ export interface TimeOff {
   reason: string | null;
   doctor: { id: string; fullName: string; color: string } | null;
 }
+
+/** Datos de la web pública de una clínica (GET /public/clinics/:slug). */
+export interface PublicClinic {
+  clinic: {
+    name: string;
+    slug: string;
+    description: string | null;
+    logoUrl: string | null;
+    primaryColor: string;
+    phone: string | null;
+    whatsapp: string | null;
+    email: string | null;
+    address: string | null;
+    city: string | null;
+    timezone: string;
+  };
+  doctors: { id: string; fullName: string; specialty: string | null; bio: string | null; photoUrl: string | null }[];
+  treatments: {
+    id: string;
+    name: string;
+    description: string | null;
+    durationMin: number;
+    price: string | null;
+    doctorIds: string[];
+    /** El tratamiento con más reservas en los últimos 90 días. */
+    popular: boolean;
+  }[];
+}
+
+export interface PublicBooking {
+  id: string;
+  status: AppointmentStatus;
+  startsAt: string;
+  endsAt: string;
+  doctor: string;
+  treatment: string;
+}
+
+export interface NextAvailable {
+  doctorId: string;
+  startsAt: string;
+}

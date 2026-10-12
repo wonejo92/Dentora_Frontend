@@ -15,10 +15,15 @@ type Options = {
   body?: unknown;
   /** false para rutas públicas (login, registro, web de la clínica). */
   auth?: boolean;
+  /** IP del visitante, para que el backend aplique el límite de peticiones por persona. */
+  clientIp?: string;
 };
 
 /** Llama al backend desde el servidor de Next, adjuntando el token de la sesión. */
-export async function api<T>(path: string, { method = "GET", body, auth = true }: Options = {}) {
+export async function api<T>(
+  path: string,
+  { method = "GET", body, auth = true, clientIp }: Options = {},
+) {
   const token = auth ? await getSessionToken() : undefined;
   if (auth && !token) throw new ApiError(401, "Tu sesión expiró");
 
@@ -29,6 +34,11 @@ export async function api<T>(path: string, { method = "GET", body, auth = true }
       headers: {
         "Content-Type": "application/json",
         ...(token && { Authorization: `Bearer ${token}` }),
+        ...(clientIp &&
+          process.env.INTERNAL_API_KEY && {
+            "x-client-ip": clientIp,
+            "x-internal-key": process.env.INTERNAL_API_KEY,
+          }),
       },
       body: body === undefined ? undefined : JSON.stringify(body),
       cache: "no-store",

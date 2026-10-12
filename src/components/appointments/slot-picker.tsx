@@ -4,9 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { getAvailability } from "@/app/actions/appointments";
 import { cn } from "@/lib/cn";
 import { addDays, formatTime } from "@/lib/time";
-import type { DoctorOption, DoctorSlots } from "@/lib/types";
+import type { DoctorSlots } from "@/lib/types";
 
 export type SlotSelection = { doctorId: string; startsAt: string };
+
+type DoctorRef = { id: string; fullName: string; color?: string };
+type FetchSlots = (treatmentId: string, date: string, doctorId?: string) => Promise<DoctorSlots[]>;
 
 const DAYS_SHOWN = 14;
 /** Hasta cuántos días adelante busca el botón "próximo día con horarios". */
@@ -36,16 +39,19 @@ export function SlotPicker({
   initialDoctorId = "",
   selected,
   onSelect,
+  fetchSlots = getAvailability,
 }: {
   treatmentId: string;
   /** Doctores que realizan el tratamiento. */
-  doctors: DoctorOption[];
+  doctors: DoctorRef[];
   timeZone: string;
   today: string;
   initialDate?: string;
   initialDoctorId?: string;
   selected: SlotSelection | null;
   onSelect: (slot: SlotSelection | null) => void;
+  /** De dónde salen los horarios: el panel (por defecto) o la web pública. */
+  fetchSlots?: FetchSlots;
 }) {
   const [date, setDate] = useState(initialDate && initialDate >= today ? initialDate : today);
   const [doctorId, setDoctorId] = useState(initialDoctorId);
@@ -64,13 +70,13 @@ export function SlotPicker({
 
   useEffect(() => {
     let active = true;
-    getAvailability(treatmentId, date, doctorId || undefined).then((data) => {
+    fetchSlots(treatmentId, date, doctorId || undefined).then((data) => {
       if (active) setResult({ key, data });
     });
     return () => {
       active = false;
     };
-  }, [key, treatmentId, date, doctorId]);
+  }, [key, treatmentId, date, doctorId, fetchSlots]);
 
   const changeDate = (next: string) => {
     setDate(next);
@@ -83,7 +89,7 @@ export function SlotPicker({
     setSearching("busy");
     for (let i = 1; i <= SEARCH_DAYS; i++) {
       const candidate = addDays(date, i);
-      const data = await getAvailability(treatmentId, candidate, doctorId || undefined);
+      const data = await fetchSlots(treatmentId, candidate, doctorId || undefined);
       if (data.some((g) => g.slots.length > 0)) {
         setResult({ key: `${treatmentId}|${candidate}|${doctorId}`, data });
         changeDate(candidate);
