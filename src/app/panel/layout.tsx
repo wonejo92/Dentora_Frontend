@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   BellIcon,
   CalendarIcon,
+  CashIcon,
   CalendarOffIcon,
   ChartIcon,
   DashboardIcon,
@@ -43,6 +44,7 @@ function navFor(role: Role): NavGroup[] {
         { href: "/panel/pacientes", label: "Pacientes", icon: <UsersIcon /> },
         { href: "/panel/doctores", label: "Doctores", icon: <StethoscopeIcon /> },
         { href: "/panel/tratamientos", label: "Tratamientos", icon: <ToothIcon /> },
+        ...(role !== "ASSISTANT" ? [{ href: "/panel/caja", label: "Caja", icon: <CashIcon /> }] : []),
       ],
     },
     {

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppointmentActions } from "@/components/appointments/appointment-actions";
+import { AccountView } from "@/components/billing/account-view";
+import { BalanceBadge } from "@/components/billing/balance-badge";
 import { ClinicalNotes, type ChartableAppointment } from "@/components/clinical/clinical-notes";
 import { MedicalAlertsBanner } from "@/components/clinical/medical-alerts";
 import { MedicalHistorySummary } from "@/components/clinical/medical-history-summary";
@@ -16,7 +18,7 @@ import { ageFrom, whatsappLink } from "@/lib/format";
 import { genderLabels, idTypeLabels, initials } from "@/lib/labels";
 import { formatTime, isFuture, localDate } from "@/lib/time";
 import { cn } from "@/lib/cn";
-import type { ClinicalNote, MedicalHistory, PatientDetail } from "@/lib/types";
+import type { ClinicalNote, MedicalHistory, PatientAccount, PatientDetail, Role } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Ficha del paciente" };
 
@@ -34,6 +36,8 @@ async function loadPatient(id: string) {
 
 /** La historia clínica solo la ven el dueño y los doctores (LOPDP). */
 const canChart = (role: string) => role === "OWNER" || role === "DOCTOR";
+/** Presupuestos y pagos: dueño, doctores y recepción. */
+const canBill = (role: string) => role === "OWNER" || role === "DOCTOR" || role === "RECEPTIONIST";
 const serverNow = () => Date.now();
 
 export default async function PatientPage({ params, searchParams }: PageProps<"/panel/pacientes/[id]">) {
@@ -42,7 +46,12 @@ export default async function PatientPage({ params, searchParams }: PageProps<"/
   const { id } = await params;
   const { tab, cita } = await searchParams;
   const chart = canChart(me.role);
-  const showHistory = chart && tab === "historia";
+  const view = tab === "historia" && chart ? "historia" : tab === "cuenta" && canBill(me.role) ? "cuenta" : "resumen";
+  const tabs = [
+    { key: "resumen", href: `/panel/pacientes/${id}`, label: "Resumen" },
+    ...(chart ? [{ key: "historia", href: `/panel/pacientes/${id}?tab=historia`, label: "Historia clínica" }] : []),
+    ...(canBill(me.role) ? [{ key: "cuenta", href: `/panel/pacientes/${id}?tab=cuenta`, label: "Cuenta" }] : []),
+  ];
   const p = await loadPatient(id);
 
   const date = (iso: string, opts: Intl.DateTimeFormatOptions) =>
@@ -69,7 +78,8 @@ export default async function PatientPage({ params, searchParams }: PageProps<"/
           <p className="text-sm text-muted tabular-nums">
             {idTypeLabels[p.idType]} {p.idNumber}
           </p>
-          <div className="mt-3 flex flex-wrap gap-2 text-xs">
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+            <BalanceBadge patientId={p.id} balance={p.balance} size="md" />
             {p.birthDate && (
               <Chip>
                 {ageFrom(p.birthDate)} años · {date(p.birthDate, { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" })}
@@ -110,19 +120,16 @@ export default async function PatientPage({ params, searchParams }: PageProps<"/
 
       <MedicalAlertsBanner alerts={p.medicalHistory} />
 
-      {chart && (
-        <nav aria-label="Secciones de la ficha" className="flex gap-1">
-          {[
-            { href: `/panel/pacientes/${p.id}`, label: "Resumen", active: !showHistory },
-            { href: `/panel/pacientes/${p.id}?tab=historia`, label: "Historia clínica", active: showHistory },
-          ].map((t) => (
+      {tabs.length > 1 && (
+        <nav aria-label="Secciones de la ficha" className="flex gap-1 overflow-x-auto">
+          {tabs.map((t) => (
             <Link
-              key={t.label}
+              key={t.key}
               href={t.href}
-              aria-current={t.active ? "page" : undefined}
+              aria-current={view === t.key ? "page" : undefined}
               className={cn(
-                "rounded-full px-4 py-2 text-sm font-medium transition-colors",
-                t.active ? "bg-night-900 text-white" : "bg-surface text-muted hover:text-ink",
+                "shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                view === t.key ? "bg-night-900 text-white" : "bg-surface text-muted hover:text-ink",
               )}
             >
               {t.label}
@@ -131,7 +138,9 @@ export default async function PatientPage({ params, searchParams }: PageProps<"/
         </nav>
       )}
 
-      {showHistory ? (
+      {view === "cuenta" ? (
+        <Account patientId={p.id} role={me.role} timeZone={tz} />
+      ) : view === "historia" ? (
         <ClinicalHistory
           patient={p}
           currentUserId={me.id}
@@ -265,6 +274,11 @@ function Overview({ patient: p, timeZone: tz, canChart }: { patient: PatientDeta
       </div>
     </div>
   );
+}
+
+async function Account({ patientId, role, timeZone }: { patientId: string; role: Role; timeZone: string }) {
+  const account = await guard(api<PatientAccount>(`/patients/${patientId}/account`));
+  return <AccountView patientId={patientId} account={account} role={role} timeZone={timeZone} />;
 }
 
 async function ClinicalHistory({

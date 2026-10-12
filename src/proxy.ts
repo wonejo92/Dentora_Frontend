@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { decodeJwt } from "jose";
 import { SESSION_COOKIE } from "@/lib/constants";
 
-const PROTECTED = ["/panel", "/admin"];
+const PROTECTED = ["/panel", "/admin", "/imprimir"];
 const AUTH_PAGES = ["/login", "/registro"];
 
 /**

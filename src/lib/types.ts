@@ -46,6 +46,8 @@ export interface Appointment {
     lastName: string;
     phone: string | null;
     medicalHistory?: MedicalAlerts | null;
+    /** Saldo pendiente (solo para quienes manejan cobros y si debe algo). */
+    balance?: string;
   };
   doctor: { id: string; fullName: string; color: string };
   treatment: { id: string; name: string; durationMin: number };
@@ -104,6 +106,8 @@ export interface Patient {
 
 export interface PatientDetail extends Patient {
   appointments: Appointment[];
+  /** Saldo pendiente; no llega para los asistentes. */
+  balance?: string;
 }
 
 export interface Paginated<T> {
@@ -293,4 +297,102 @@ export interface ClinicalNote {
     doctor: { fullName: string };
   } | null;
   addenda: { id: string; text: string; createdAt: string; author: { id: string; fullName: string } }[];
+}
+
+// ─── Presupuestos y caja ───
+// Los montos llegan como texto (Decimal), por ejemplo "35" o "97.85".
+
+export type BudgetStatus = "DRAFT" | "APPROVED" | "REJECTED" | "CANCELLED";
+export type PaymentMethod = "CASH" | "TRANSFER" | "CARD" | "OTHER";
+
+export interface BudgetItem {
+  id: string;
+  treatmentId: string | null;
+  description: string;
+  tooth: string | null;
+  quantity: number;
+  unitPrice: string;
+  discountPercent: string;
+  total: string;
+  position: number;
+  completedAt: string | null;
+}
+
+export interface Budget {
+  id: string;
+  patientId: string;
+  number: number;
+  status: BudgetStatus;
+  discountPercent: string;
+  subtotal: string;
+  total: string;
+  notes: string | null;
+  validUntil: string | null;
+  approvedAt: string | null;
+  createdAt: string;
+  createdBy: { id: string; fullName: string };
+  items: BudgetItem[];
+  paid: string;
+  balance: string;
+}
+
+export interface BudgetDetail extends Budget {
+  patient: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    idType: IdType;
+    idNumber: string;
+    phone: string | null;
+    email: string | null;
+  };
+  clinic: {
+    name: string;
+    ruc: string | null;
+    address: string | null;
+    city: string | null;
+    phone: string | null;
+    email: string | null;
+    logoUrl: string | null;
+    primaryColor: string;
+    timezone: string;
+  };
+}
+
+export interface Payment {
+  id: string;
+  /** Nº de recibo. */
+  number: number;
+  patientId: string;
+  budgetId: string | null;
+  amount: string;
+  method: PaymentMethod;
+  reference: string | null;
+  concept: string | null;
+  paidAt: string;
+  voidedAt: string | null;
+  voidReason: string | null;
+  receivedBy: { id: string; fullName: string };
+  voidedBy: { id: string; fullName: string } | null;
+  budget: { id: string; number: number } | null;
+  patient: { id: string; firstName: string; lastName: string };
+}
+
+export interface PatientAccount {
+  budgets: Budget[];
+  payments: Payment[];
+  summary: { charged: string; paid: string; balance: string };
+}
+
+export interface CashReport {
+  items: Payment[];
+  summary: { total: string; count: number; voided: number; byMethod: Record<PaymentMethod, string> };
+}
+
+export interface PaymentReceipt extends Omit<Payment, "budget" | "patient"> {
+  budget: { id: string; number: number; total: string } | null;
+  patient: BudgetDetail["patient"];
+  clinic: BudgetDetail["clinic"];
+  /** Saldo del presupuesto justo después de este pago (null en pagos sueltos). */
+  balanceAfter: string | null;
 }

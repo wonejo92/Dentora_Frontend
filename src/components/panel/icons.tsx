@@ -168,3 +168,10 @@ export const ClipboardIcon = () => (
     <path d="M9 12h6M9 16h4" />
   </svg>
 );
+export const CashIcon = () => (
+  <svg {...base}>
+    <rect x="3" y="6" width="18" height="12" rx="2" />
+    <circle cx="12" cy="12" r="2.5" />
+    <path d="M6 9.5v.01M18 14.5v.01" />
+  </svg>
+);
