@@ -120,7 +120,7 @@ export default async function PanelLayout({ children }: LayoutProps<"/panel">) {
                 <path d="M12 5v14M5 12h14" />
               </svg>
             </NewAppointmentDialog>
-            <UserMenu me={me} logout="mobile" />
+            <UserMenu me={me} logout="mobile" profileHref="/panel/perfil" />
             <div className="hidden items-center gap-2 rounded-full bg-surface px-4 py-2.5 text-sm xl:flex">
               <CalendarIcon />
               {today}

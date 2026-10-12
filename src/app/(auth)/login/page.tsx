@@ -7,6 +7,7 @@ export const metadata: Metadata = { title: "Iniciar sesión" };
 
 const motivos: Record<string, { tone: "info" | "warning"; text: string }> = {
   expirada: { tone: "info", text: "Tu sesión expiró. Vuelve a iniciar sesión." },
+  contrasena: { tone: "info", text: "Tu contraseña cambió. Inicia sesión con la nueva." },
   suspendida: {
     tone: "warning",
     text: "Tu clínica está suspendida. Escríbenos para reactivarla.",
