@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { confirmAppointment } from "@/app/actions/appointments";
+import { BalanceBadge } from "@/components/billing/balance-badge";
 import { MedicalAlertsBadge } from "@/components/clinical/medical-alerts";
 import { AppointmentActions } from "@/components/appointments/appointment-actions";
 import {
@@ -115,6 +116,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/panel"
                       <span className="flex items-center gap-2">
                         {a.patient.firstName} {a.patient.lastName}
                         <MedicalAlertsBadge alerts={a.patient.medicalHistory} />
+                        <BalanceBadge patientId={a.patient.id} balance={a.patient.balance} />
                       </span>
                     </td>
                     <td className="py-3 pr-4 text-muted">{a.treatment.name}</td>

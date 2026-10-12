@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BalanceBadge } from "@/components/billing/balance-badge";
 import { MedicalAlertsBadge } from "@/components/clinical/medical-alerts";
 import { AppointmentActions } from "@/components/appointments/appointment-actions";
 import { NewAppointmentDialog } from "@/components/appointments/new-appointment-dialog";
@@ -172,6 +173,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/panel/age
                     {a.patient.firstName} {a.patient.lastName}
                   </span>
                   <MedicalAlertsBadge alerts={a.patient.medicalHistory} />
+                  <BalanceBadge patientId={a.patient.id} balance={a.patient.balance} />
                 </p>
                 <p className="truncate text-xs text-muted">
                   {a.treatment.name} · {a.doctor.fullName}
