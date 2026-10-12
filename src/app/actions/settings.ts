@@ -33,8 +33,14 @@ export async function saveClinic(_prev: SettingsState, formData: FormData) {
   const name = text(formData, "name");
   if (name.length < 3) return { error: "Escribe el nombre de la clínica" };
 
+  const slug = text(formData, "slug").toLowerCase();
+  if (slug && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+    return { error: "La dirección solo admite minúsculas, números y guiones (sin espacios ni tildes)" };
+  }
+
   return save("/clinic", "PATCH", {
     name,
+    slug: slug || undefined,
     ruc: optional(formData, "ruc"),
     description: optional(formData, "description"),
     phone: optional(formData, "phone"),

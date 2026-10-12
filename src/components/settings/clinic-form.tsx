@@ -12,7 +12,7 @@ import { SaveBar, SettingsCard } from "./save-bar";
 const localWhatsapp = (value: string | null) =>
   value && /^5939\d{8}$/.test(value) ? `0${value.slice(3)}` : (value ?? "");
 
-export function ClinicForm({ clinic: c }: { clinic: Clinic }) {
+export function ClinicForm({ clinic: c, siteHost }: { clinic: Clinic; siteHost: string }) {
   const { state, pending, onSubmit } = useFormAction<SettingsState>(saveClinic, {});
   const colors = DOCTOR_COLORS.includes(c.primaryColor.toUpperCase()) ? DOCTOR_COLORS : [c.primaryColor, ...DOCTOR_COLORS];
 
@@ -22,6 +22,30 @@ export function ClinicForm({ clinic: c }: { clinic: Clinic }) {
 
       <SettingsCard title="Datos generales" description="Así aparece tu clínica en el panel y en su web de reservas.">
         <Field label="Nombre de la clínica" name="name" defaultValue={c.name} minLength={3} maxLength={80} required />
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="slug" className="text-sm font-medium">
+            Dirección de tu web
+          </label>
+          <div className="flex h-11 items-center overflow-hidden rounded-xl border border-line bg-surface focus-within:border-brand-500 focus-within:ring-4 focus-within:ring-brand-50">
+            <span className="flex h-full items-center border-r border-line bg-canvas px-3 text-sm text-muted">{siteHost}/</span>
+            <input
+              id="slug"
+              name="slug"
+              defaultValue={c.slug}
+              required
+              minLength={3}
+              maxLength={50}
+              pattern="[a-z0-9]+(-[a-z0-9]+)*"
+              title="Solo minúsculas, números y guiones"
+              autoCapitalize="none"
+              spellCheck={false}
+              className="h-full w-full bg-transparent px-3 text-sm text-ink focus:outline-none"
+            />
+          </div>
+          <p className="text-xs text-muted">
+            Solo minúsculas, números y guiones. Si la cambias, los enlaces que ya compartiste dejarán de funcionar.
+          </p>
+        </div>
         <Field
           label="RUC"
           name="ruc"
