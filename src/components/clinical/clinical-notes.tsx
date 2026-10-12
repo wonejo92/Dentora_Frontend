@@ -433,6 +433,7 @@ function NoteDialog({
           indications: note.indications ?? "",
           prescription: note.prescription ?? "",
           vitals: note.vitals ?? {},
+          appointmentId: note.appointmentId ?? undefined,
         }
       : {
           ...EMPTY,
@@ -441,6 +442,19 @@ function NoteDialog({
   );
   const [error, setError] = useState<string>();
   const [pending, startTransition] = useTransition();
+  // Al editar, la cita actual también es una opción (las demás son citas libres).
+  const current = note?.appointment;
+  const options: ChartableAppointment[] = current
+    ? [
+        {
+          id: current.id,
+          startsAt: current.startsAt,
+          label: `${current.treatment.name} · ${current.doctor.fullName}`,
+          completed: true,
+        },
+        ...appointments,
+      ]
+    : appointments;
   const set = <K extends keyof NoteInput>(key: K, value: NoteInput[K]) => setForm((f) => ({ ...f, [key]: value }));
   const hasVitals = Object.values(form.vitals).some((v) => v !== undefined && v !== "");
 
@@ -500,7 +514,7 @@ function NoteDialog({
       <div className="space-y-5">
         <FormError message={error} />
 
-        {!note && (
+        {options.length > 0 && (
           <div className="flex flex-col gap-1.5">
             <label htmlFor="note-appointment" className="text-sm font-medium">
               Cita
@@ -512,7 +526,7 @@ function NoteDialog({
               className={cn(controlClass(), "h-11")}
             >
               <option value="">Sin cita asociada</option>
-              {appointments.map((a) => (
+              {options.map((a) => (
                 <option key={a.id} value={a.id}>
                   {date(a.startsAt, {
                     day: "numeric",

@@ -14,7 +14,7 @@ import { api, ApiError } from "@/lib/api";
 import { guard, requireClinicUser } from "@/lib/dal";
 import { ageFrom, whatsappLink } from "@/lib/format";
 import { genderLabels, idTypeLabels, initials } from "@/lib/labels";
-import { formatTime, isFuture } from "@/lib/time";
+import { formatTime, isFuture, localDate } from "@/lib/time";
 import { cn } from "@/lib/cn";
 import type { ClinicalNote, MedicalHistory, PatientDetail } from "@/lib/types";
 
@@ -283,14 +283,17 @@ async function ClinicalHistory({
     guard(api<ClinicalNote[]>(`/patients/${p.id}/clinical-notes`)),
   ]);
   const now = serverNow();
+  const today = localDate(new Date(now), timeZone);
   const charted = new Set(notes.map((n) => n.appointmentId));
-  // Citas sin evolución que ya empezaron (atendidas o aún sin marcar).
+  // Citas sin evolución: atendidas, o pendientes/confirmadas de hoy o de días anteriores
+  // (el paciente pudo llegar antes de su hora).
   const appointments: ChartableAppointment[] = p.appointments
     .filter(
       (a) =>
         !charted.has(a.id) &&
         (a.status === "COMPLETED" ||
-          ((a.status === "CONFIRMED" || a.status === "PENDING") && Date.parse(a.startsAt) <= now)),
+          ((a.status === "CONFIRMED" || a.status === "PENDING") &&
+            localDate(new Date(a.startsAt), timeZone) <= today)),
     )
     .slice(0, 15)
     .map((a) => ({

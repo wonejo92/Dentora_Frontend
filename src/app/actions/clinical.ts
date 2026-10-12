@@ -56,7 +56,8 @@ export async function saveClinicalNote(patientId: string, noteId: string | null,
   // Al editar, un texto vacío se envía como null para poder borrarlo.
   const text = (value: string) => value.trim() || (noteId ? null : undefined);
   const body = {
-    appointmentId: noteId ? undefined : input.appointmentId || undefined,
+    // Al editar, null quita la cita asociada.
+    appointmentId: input.appointmentId || (noteId ? null : undefined),
     reason: text(input.reason),
     findings: text(input.findings),
     diagnoses: input.diagnoses.map((d) => ({
