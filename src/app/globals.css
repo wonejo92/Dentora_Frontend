@@ -90,10 +90,12 @@
 
   --color-red-50: #2e1415;
   --color-red-100: #3d1a1c;
+  --color-red-200: #5a2224;
   --color-red-300: #7a2e30;
   --color-red-400: #c2474a;
   --color-red-600: #e5484d;
   --color-red-700: #f58a8c;
+  --color-red-800: #f8a5a7;
 
   --color-slate-100: #1c2a2e;
   --color-slate-600: #a7b6ba;
@@ -135,14 +137,21 @@
 
     --color-red-50: #2e1415;
     --color-red-100: #3d1a1c;
+    --color-red-200: #5a2224;
     --color-red-300: #7a2e30;
     --color-red-400: #c2474a;
     --color-red-600: #e5484d;
     --color-red-700: #f58a8c;
+    --color-red-800: #f8a5a7;
 
     --color-slate-100: #1c2a2e;
     --color-slate-600: #a7b6ba;
   }
+}
+
+/* Con un modal abierto, la página de atrás no se mueve. */
+html:has(dialog[open]) {
+  overflow: hidden;
 }
 
 body {

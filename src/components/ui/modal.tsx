@@ -70,7 +70,7 @@ export function Modal({
               </svg>
             </button>
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-6 sm:px-7 sm:pb-7">{children}</div>
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-6 sm:px-7 sm:pb-7">{children}</div>
           {footer && (
             <div className="flex justify-end gap-2 border-t border-line px-6 py-4 sm:px-7">{footer}</div>
           )}
