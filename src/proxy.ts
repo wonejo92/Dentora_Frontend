@@ -11,6 +11,14 @@ const AUTH_PAGES = ["/login", "/registro"];
  */
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Web de las clínicas: los slugs son en minúsculas (/DentriClinic/reservar → /dentriclinic/reservar).
+  if (/[A-Z]/.test(pathname)) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname.toLowerCase();
+    return NextResponse.redirect(url, 308);
+  }
+
   const token = request.cookies.get(SESSION_COOKIE)?.value;
   const loggedIn = !!token && !isExpired(token);
 
@@ -35,5 +43,6 @@ function isExpired(token: string) {
 }
 
 export const config = {
-  matcher: ["/panel/:path*", "/admin/:path*", "/login", "/registro"],
+  // Todas las páginas (la web de cada clínica vive en la raíz), menos archivos internos y estáticos.
+  matcher: ["/((?!_next/|api/|favicon.ico|.*\\.[a-z0-9]+$).*)"],
 };

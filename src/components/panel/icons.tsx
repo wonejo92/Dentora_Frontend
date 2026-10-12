@@ -115,3 +115,32 @@ export const CalendarOffIcon = () => (
     <path d="M9 5h9a2 2 0 0 1 2 2v9M19.8 19.8A2 2 0 0 1 18 21H6a2 2 0 0 1-2-2V7a2 2 0 0 1 1.6-2M16 3v4M8 3v1M4 11h7M15 11h5M3 3l18 18" />
   </svg>
 );
+export const MapPinIcon = () => (
+  <svg {...base}>
+    <path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z" />
+    <circle cx="12" cy="9.5" r="2.5" />
+  </svg>
+);
+export const BoltIcon = () => (
+  <svg {...base}>
+    <path d="M13 3 4 14h7l-1 7 9-11h-7l1-7Z" />
+  </svg>
+);
+export const ReceiptOffIcon = () => (
+  <svg {...base}>
+    <path d="M5 5v16l3-2 2 2 2-2 2 2 2-2 3 2V9M7 3h10a2 2 0 0 1 2 2v1M9 7h1M9 11h4M3 3l18 18" />
+  </svg>
+);
+export const ShieldLockIcon = () => (
+  <svg {...base}>
+    <path d="M12 3 5 6v5c0 4.5 3 8.5 7 10 4-1.5 7-5.5 7-10V6l-7-3Z" />
+    <rect x="9.5" y="11" width="5" height="4" rx="1" />
+    <path d="M10.5 11V9.5a1.5 1.5 0 0 1 3 0V11" />
+  </svg>
+);
+export const WhatsappIcon = () => (
+  <svg {...base}>
+    <path d="M3 21l1.65-3.8A9 9 0 1 1 8 20.3L3 21Z" />
+    <path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1" />
+  </svg>
+);
