@@ -11,6 +11,7 @@ import { formatDuration, formatPrice } from "@/lib/format";
 import { idTypeLabels, initials } from "@/lib/labels";
 import { formatTime, localDate } from "@/lib/time";
 import type { BookingOptions, Patient } from "@/lib/types";
+import { MedicalAlertsBanner } from "@/components/clinical/medical-alerts";
 import { PatientPicker } from "./patient-picker";
 import { SlotPicker, type SlotSelection } from "./slot-picker";
 
@@ -129,24 +130,27 @@ function NewAppointmentForm({
 
         <Step number={1} title="Paciente" done={!!patient}>
           {patient ? (
-            <div className="flex items-center gap-3 rounded-2xl border border-line px-4 py-3">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-50 text-sm font-bold text-brand-600">
-                {initials(`${patient.firstName.split(" ")[0]} ${patient.lastName}`)}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-semibold">
-                  {patient.firstName} {patient.lastName}
-                </p>
-                <p className="text-xs text-muted tabular-nums">
-                  {idTypeLabels[patient.idType]} {patient.idNumber}
-                </p>
+            <>
+              <div className="flex items-center gap-3 rounded-2xl border border-line px-4 py-3">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-50 text-sm font-bold text-brand-600">
+                  {initials(`${patient.firstName.split(" ")[0]} ${patient.lastName}`)}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-semibold">
+                    {patient.firstName} {patient.lastName}
+                  </p>
+                  <p className="text-xs text-muted tabular-nums">
+                    {idTypeLabels[patient.idType]} {patient.idNumber}
+                  </p>
+                </div>
+                {!initialPatient && (
+                  <button type="button" onClick={() => setPatient(null)} className="text-sm font-semibold text-brand-500 hover:text-brand-600">
+                    Cambiar
+                  </button>
+                )}
               </div>
-              {!initialPatient && (
-                <button type="button" onClick={() => setPatient(null)} className="text-sm font-semibold text-brand-500 hover:text-brand-600">
-                  Cambiar
-                </button>
-              )}
-            </div>
+              <MedicalAlertsBanner alerts={patient.medicalHistory} className="mt-2" />
+            </>
           ) : (
             <PatientPicker onSelect={setPatient} />
           )}

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useTransition } from "react";
 import { changeAppointmentStatus, getBookingOptions, rescheduleAppointment } from "@/app/actions/appointments";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/ui/form-error";
@@ -13,51 +13,49 @@ import { SlotPicker, type SlotSelection } from "./slot-picker";
 
 type Dialog = "cancel" | "reschedule" | null;
 
-/** Acciones de una cita según su estado, en un menú "···". */
-export function AppointmentActions({ appointment: a, timeZone }: { appointment: Appointment; timeZone: string }) {
-  const [menu, setMenu] = useState<{ top: number; right: number } | null>(null);
+/**
+ * Acciones de una cita según su estado, en un menú "···".
+ * `canChart`: el usuario puede escribir en la historia clínica (dueño o doctor).
+ */
+export function AppointmentActions({
+  appointment: a,
+  timeZone,
+  canChart = false,
+}: {
+  appointment: Appointment;
+  timeZone: string;
+  canChart?: boolean;
+}) {
   const [dialog, setDialog] = useState<Dialog>(null);
-  const [error, setError] = useState<string>();
+  const [notice, setNotice] = useState<{ error: string } | "chart" | null>(null);
+  const chartHref = `/panel/pacientes/${a.patient.id}?tab=historia&cita=${a.id}`;
   const [pending, startTransition] = useTransition();
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const { pos: menuPos, ref: menuRef, open: openMenu, close: closeMenu } = useFloating(buttonRef);
+  const {
+    pos: noticePos,
+    ref: noticeRef,
+    open: openNotice,
+    close: closeNotice,
+  } = useFloating(buttonRef, () => setNotice(null));
 
-  // Menú con posición fija: no lo recortan tablas con scroll ni tarjetas con overflow.
-  const openMenu = () => {
-    const rect = buttonRef.current!.getBoundingClientRect();
-    setMenu({ top: rect.bottom + 6, right: window.innerWidth - rect.right });
+  const showNotice = (value: { error: string } | "chart") => {
+    setNotice(value);
+    openNotice();
   };
 
-  useEffect(() => {
-    if (!menu) return;
-    const close = (e: Event) => {
-      if (e.type === "keydown" && (e as KeyboardEvent).key !== "Escape") return;
-      if (e.type === "mousedown" && (menuRef.current?.contains(e.target as Node) || buttonRef.current?.contains(e.target as Node))) return;
-      setMenu(null);
-    };
-    document.addEventListener("mousedown", close);
-    document.addEventListener("keydown", close);
-    window.addEventListener("scroll", close, true);
-    window.addEventListener("resize", close);
-    return () => {
-      document.removeEventListener("mousedown", close);
-      document.removeEventListener("keydown", close);
-      window.removeEventListener("scroll", close, true);
-      window.removeEventListener("resize", close);
-    };
-  }, [menu]);
-
   const setStatus = (status: AppointmentStatus) => {
-    setMenu(null);
-    setError(undefined);
+    closeMenu();
+    closeNotice();
     startTransition(async () => {
       const result = await changeAppointmentStatus(a.id, status);
-      if (!result.ok) setError(result.error);
+      if (!result.ok) showNotice({ error: result.error });
+      else if (status === "COMPLETED" && canChart) showNotice("chart");
     });
   };
 
   const open = (d: Dialog) => {
-    setMenu(null);
+    closeMenu();
     setDialog(d);
   };
 
@@ -82,9 +80,9 @@ export function AppointmentActions({ appointment: a, timeZone }: { appointment: 
       <button
         ref={buttonRef}
         type="button"
-        onClick={() => (menu ? setMenu(null) : openMenu())}
+        onClick={() => (menuPos ? closeMenu() : openMenu())}
         aria-haspopup="menu"
-        aria-expanded={!!menu}
+        aria-expanded={!!menuPos}
         aria-label={`Acciones de la cita de ${a.patient.firstName} ${a.patient.lastName}`}
         disabled={pending}
         className="flex size-9 items-center justify-center rounded-full text-muted transition-colors hover:bg-canvas hover:text-ink disabled:opacity-50"
@@ -100,17 +98,37 @@ export function AppointmentActions({ appointment: a, timeZone }: { appointment: 
         )}
       </button>
 
-      {error && (
-        <p role="alert" className="absolute top-full right-0 z-10 mt-1 w-64 rounded-lg bg-red-50 px-3 py-2 text-left text-xs text-red-700 shadow-md">
-          {error}
-        </p>
+      {noticePos && notice && (
+        <div
+          ref={noticeRef}
+          role={notice === "chart" ? "status" : "alert"}
+          style={{ top: noticePos.top, right: noticePos.right }}
+          className="fixed z-50 w-64 rounded-2xl border border-line bg-surface p-3 text-left text-sm shadow-xl shadow-black/10"
+        >
+          {notice === "chart" ? (
+            <>
+              <p className="font-semibold">Cita atendida</p>
+              <p className="text-xs text-muted">¿Registras la evolución ahora?</p>
+              <div className="mt-2.5 flex justify-end gap-2">
+                <button type="button" onClick={closeNotice} className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted hover:bg-canvas">
+                  Después
+                </button>
+                <Link href={chartHref} className="rounded-lg bg-brand-500 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-brand-600">
+                  Registrar evolución
+                </Link>
+              </div>
+            </>
+          ) : (
+            <p className="text-xs text-red-600">{notice.error}</p>
+          )}
+        </div>
       )}
 
-      {menu && (
+      {menuPos && (
         <div
           ref={menuRef}
           role="menu"
-          style={{ top: menu.top, right: menu.right }}
+          style={{ top: menuPos.top, right: menuPos.right }}
           className="fixed z-50 w-56 overflow-hidden rounded-2xl border border-line bg-surface py-1 text-left shadow-xl shadow-black/10"
         >
           {items.map((item) => (
@@ -127,6 +145,11 @@ export function AppointmentActions({ appointment: a, timeZone }: { appointment: 
               {item.label}
             </button>
           ))}
+          {canChart && a.status === "COMPLETED" && (
+            <Link href={chartHref} role="menuitem" className="block px-4 py-2.5 text-sm transition-colors hover:bg-canvas">
+              Registrar evolución
+            </Link>
+          )}
           <Link
             href={`/panel/pacientes/${a.patient.id}`}
             role="menuitem"
@@ -143,6 +166,63 @@ export function AppointmentActions({ appointment: a, timeZone }: { appointment: 
       )}
     </span>
   );
+}
+
+type FloatingPos = { top: number; right: number; anchorTop: number };
+
+/**
+ * Capa con posición fija junto al botón: no la recortan tablas con scroll ni
+ * tarjetas con overflow. Si no cabe debajo, se abre hacia arriba. Se cierra con
+ * Esc, al hacer clic fuera, con scroll o al cambiar el tamaño de la ventana.
+ */
+function useFloating(anchorRef: React.RefObject<HTMLElement | null>, onClose?: () => void) {
+  const [pos, setPos] = useState<FloatingPos | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
+
+  const open = () => {
+    const rect = anchorRef.current?.getBoundingClientRect();
+    if (rect) setPos({ top: rect.bottom + 6, right: window.innerWidth - rect.right, anchorTop: rect.top });
+  };
+  const close = () => {
+    setPos(null);
+    onCloseRef.current?.();
+  };
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!pos || !el) return;
+    const height = el.offsetHeight;
+    if (pos.top + height > window.innerHeight - 8 && pos.anchorTop - height - 6 > 8) {
+      el.style.top = `${pos.anchorTop - height - 6}px`;
+    }
+  }, [pos]);
+
+  useEffect(() => {
+    if (!pos) return;
+    const dismiss = (e: Event) => {
+      if (e.type === "keydown" && (e as KeyboardEvent).key !== "Escape") return;
+      const target = e.target as Node;
+      if (e.type === "mousedown" && (ref.current?.contains(target) || anchorRef.current?.contains(target))) return;
+      setPos(null);
+      onCloseRef.current?.();
+    };
+    document.addEventListener("mousedown", dismiss);
+    document.addEventListener("keydown", dismiss);
+    window.addEventListener("scroll", dismiss, true);
+    window.addEventListener("resize", dismiss);
+    return () => {
+      document.removeEventListener("mousedown", dismiss);
+      document.removeEventListener("keydown", dismiss);
+      window.removeEventListener("scroll", dismiss, true);
+      window.removeEventListener("resize", dismiss);
+    };
+  }, [pos, anchorRef]);
+
+  return { pos, ref, open, close };
 }
 
 const describe = (a: Appointment, timeZone: string) =>

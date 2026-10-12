@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { MedicalAlertsBadge } from "@/components/clinical/medical-alerts";
 import { AppointmentActions } from "@/components/appointments/appointment-actions";
 import { NewAppointmentDialog } from "@/components/appointments/new-appointment-dialog";
 import { DateInput } from "@/components/list/date-input";
@@ -166,8 +167,11 @@ export default async function AgendaPage({ searchParams }: PageProps<"/panel/age
                 aria-hidden
               />
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold">
-                  {a.patient.firstName} {a.patient.lastName}
+                <p className="flex items-center gap-2 text-sm font-semibold">
+                  <span className="truncate">
+                    {a.patient.firstName} {a.patient.lastName}
+                  </span>
+                  <MedicalAlertsBadge alerts={a.patient.medicalHistory} />
                 </p>
                 <p className="truncate text-xs text-muted">
                   {a.treatment.name} · {a.doctor.fullName}
@@ -175,7 +179,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/panel/age
                 </p>
               </div>
               <StatusBadge status={a.status} />
-              <AppointmentActions appointment={a} timeZone={tz} />
+              <AppointmentActions appointment={a} timeZone={tz} canChart={me.role === "OWNER" || me.role === "DOCTOR"} />
             </li>
           ))}
         </ul>

@@ -40,7 +40,13 @@ export interface Appointment {
   status: AppointmentStatus;
   source: "PANEL" | "ONLINE";
   notes: string | null;
-  patient: { id: string; firstName: string; lastName: string; phone: string | null };
+  patient: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    phone: string | null;
+    medicalHistory?: MedicalAlerts | null;
+  };
   doctor: { id: string; fullName: string; color: string };
   treatment: { id: string; name: string; durationMin: number };
 }
@@ -92,6 +98,8 @@ export interface Patient {
   notes: string | null;
   dataConsentAt: string | null;
   createdAt: string;
+  /** Alertas médicas: las ve todo el personal. */
+  medicalHistory?: MedicalAlerts | null;
 }
 
 export interface PatientDetail extends Patient {
@@ -233,4 +241,56 @@ export interface PublicBooking {
 export interface NextAvailable {
   doctorId: string;
   startsAt: string;
+}
+
+// ─── Historia clínica ───
+
+export interface MedicalAlerts {
+  allergies: string[];
+  /** Claves de `CONDITIONS` (lib/clinical.ts). */
+  conditions: string[];
+}
+
+export interface MedicalHistory extends MedicalAlerts {
+  id: string;
+  answers: Record<string, string>;
+  updatedAt: string;
+  updatedBy: { id: string; fullName: string } | null;
+}
+
+export interface Diagnosis {
+  code: string;
+  label: string;
+  comment?: string;
+}
+
+export interface Vitals {
+  bloodPressure?: string;
+  pulse?: number;
+  temperature?: number;
+}
+
+export interface ClinicalNote {
+  id: string;
+  appointmentId: string | null;
+  authorId: string;
+  reason: string | null;
+  findings: string | null;
+  diagnoses: Diagnosis[];
+  procedure: string | null;
+  indications: string | null;
+  prescription: string | null;
+  vitals: Vitals | null;
+  createdAt: string;
+  updatedAt: string;
+  /** Después de esta fecha la evolución solo admite aclaraciones. */
+  editableUntil: string;
+  author: { id: string; fullName: string };
+  appointment: {
+    id: string;
+    startsAt: string;
+    treatment: { name: string };
+    doctor: { fullName: string };
+  } | null;
+  addenda: { id: string; text: string; createdAt: string; author: { id: string; fullName: string } }[];
 }

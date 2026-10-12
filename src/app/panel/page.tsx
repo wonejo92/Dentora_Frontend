@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { confirmAppointment } from "@/app/actions/appointments";
+import { MedicalAlertsBadge } from "@/components/clinical/medical-alerts";
 import { AppointmentActions } from "@/components/appointments/appointment-actions";
 import {
   CalendarCheckIcon,
@@ -111,7 +112,10 @@ export default async function DashboardPage({ searchParams }: PageProps<"/panel"
                   <tr key={a.id}>
                     <td className="py-3 pr-4 font-semibold tabular-nums">{formatTime(a.startsAt, tz)}</td>
                     <td className="py-3 pr-4">
-                      {a.patient.firstName} {a.patient.lastName}
+                      <span className="flex items-center gap-2">
+                        {a.patient.firstName} {a.patient.lastName}
+                        <MedicalAlertsBadge alerts={a.patient.medicalHistory} />
+                      </span>
                     </td>
                     <td className="py-3 pr-4 text-muted">{a.treatment.name}</td>
                     <td className="py-3 pr-4 text-muted">
@@ -124,7 +128,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/panel"
                       <StatusBadge status={a.status} />
                     </td>
                     <td className="py-3 text-right">
-                      <AppointmentActions appointment={a} timeZone={tz} />
+                      <AppointmentActions appointment={a} timeZone={tz} canChart={me.role === "OWNER" || me.role === "DOCTOR"} />
                     </td>
                   </tr>
                 ))}

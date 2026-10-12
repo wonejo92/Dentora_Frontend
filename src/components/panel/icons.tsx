@@ -144,3 +144,27 @@ export const WhatsappIcon = () => (
     <path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1" />
   </svg>
 );
+export const AlertTriangleIcon = () => (
+  <svg {...base}>
+    <path d="M10.3 3.9 2.4 17.6A2 2 0 0 0 4.1 20.6h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+    <path d="M12 9v4M12 17h.01" />
+  </svg>
+);
+export const LockIcon = () => (
+  <svg {...base}>
+    <rect x="5" y="11" width="14" height="10" rx="2" />
+    <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+  </svg>
+);
+export const PencilIcon = () => (
+  <svg {...base}>
+    <path d="M4 20h4L18.5 9.5a2.8 2.8 0 0 0-4-4L4 16v4ZM13.5 6.5l4 4" />
+  </svg>
+);
+export const ClipboardIcon = () => (
+  <svg {...base}>
+    <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+    <rect x="9" y="3" width="6" height="4" rx="1" />
+    <path d="M9 12h6M9 16h4" />
+  </svg>
+);
