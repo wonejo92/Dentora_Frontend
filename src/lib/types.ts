@@ -396,3 +396,46 @@ export interface PaymentReceipt extends Omit<Payment, "budget" | "patient"> {
   /** Saldo del presupuesto justo después de este pago (null en pagos sueltos). */
   balanceAfter: string | null;
 }
+
+// ─── Reportes ───
+
+export interface ReportSummary {
+  range: {
+    from: string;
+    to: string;
+    granularity: "day" | "week" | "month";
+    previous: { from: string; to: string };
+  };
+  income: {
+    total: string;
+    count: number;
+    previous: string;
+    byMethod: Record<PaymentMethod, string>;
+    series: { bucket: string; amount: string }[];
+  };
+  appointments: {
+    total: number;
+    pending: number;
+    confirmed: number;
+    completed: number;
+    noShow: number;
+    cancelled: number;
+    online: number;
+    previousCompleted: number;
+    noShowRate: number | null;
+    previousNoShowRate: number | null;
+  };
+  patients: { new: number; previous: number };
+  treatments: { id: string; name: string; count: number }[];
+  doctors: {
+    id: string;
+    fullName: string;
+    color: string;
+    total: number;
+    completed: number;
+    noShow: number;
+    cancelled: number;
+  }[];
+  budgets: { approvedCount: number; approvedTotal: string; acceptanceRate: number | null };
+  receivable: string;
+}

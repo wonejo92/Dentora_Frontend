@@ -26,7 +26,7 @@ import { initials, roleLabels } from "@/lib/labels";
 import { formatLongDate, localDate } from "@/lib/time";
 import type { Appointment, Role } from "@/lib/types";
 
-/** Menú según el rol: Personal y Ajustes son solo para el dueño. */
+/** Menú según el rol: Reportes, Personal y Ajustes son solo para el dueño. */
 function navFor(role: Role): NavGroup[] {
   const isOwner = role === "OWNER";
   return [
@@ -47,10 +47,10 @@ function navFor(role: Role): NavGroup[] {
         ...(role !== "ASSISTANT" ? [{ href: "/panel/caja", label: "Caja", icon: <CashIcon /> }] : []),
       ],
     },
-    {
-      title: "Análisis",
-      items: [{ href: "/panel/reportes", label: "Reportes", icon: <ChartIcon /> }],
-    },
+    // Reportes: datos del negocio, solo el dueño.
+    ...(isOwner
+      ? [{ title: "Análisis", items: [{ href: "/panel/reportes", label: "Reportes", icon: <ChartIcon /> }] }]
+      : []),
     ...(isOwner
       ? [
           {
