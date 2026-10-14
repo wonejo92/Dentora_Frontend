@@ -80,17 +80,22 @@ export function IncomeChart({
           Sin cobros en este período
         </p>
       )}
-      <table className="sr-only">
-        <caption>Ingresos por {granularity === "day" ? "día" : granularity === "week" ? "semana" : "mes"}</caption>
-        <tbody>
-          {series.map((s) => (
-            <tr key={s.bucket}>
-              <td>{tooltipLabel(s.bucket, granularity)}</td>
-              <td>{money(s.amount)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+
+      {/* Los mismos datos en tabla, para lectores de pantalla. Va dentro de un div
+          porque una <table> ignora el recorte de sr-only y alargaría la página. */}
+      <div className="sr-only">
+        <table>
+          <caption>Ingresos por {granularity === "day" ? "día" : granularity === "week" ? "semana" : "mes"}</caption>
+          <tbody>
+            {series.map((s) => (
+              <tr key={s.bucket}>
+                <td>{tooltipLabel(s.bucket, granularity)}</td>
+                <td>{money(s.amount)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

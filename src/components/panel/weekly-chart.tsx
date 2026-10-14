@@ -111,19 +111,21 @@ export function WeeklyChart({
           ]}
         />
       </div>
-
-      {/* Los mismos datos en tabla, para lectores de pantalla. */}
-      <table className="sr-only">
-        <caption>Citas por semana</caption>
-        <tbody>
-          {weeks.map((w) => (
-            <tr key={w.weekStart}>
-              <td>{fmt(w.weekStart)}</td>
-              <td>{w.count}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {/* Los mismos datos en tabla, para lectores de pantalla. Va dentro de un div
+          porque una <table> ignora el recorte de sr-only y alargaría la página. */}
+      <div className="sr-only">
+        <table>
+          <caption>Citas por semana</caption>
+          <tbody>
+            {weeks.map((w) => (
+              <tr key={w.weekStart}>
+                <td>{fmt(w.weekStart)}</td>
+                <td>{w.count}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
