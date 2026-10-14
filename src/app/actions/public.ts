@@ -1,14 +1,8 @@
 "use server";
 
-import { headers } from "next/headers";
 import { api, ApiError } from "@/lib/api";
+import { clientIp } from "@/lib/client-ip";
 import type { DoctorSlots, NextAvailable, PublicBooking } from "@/lib/types";
-
-/** IP del paciente, para que el backend limite las reservas por persona y no por servidor. */
-async function clientIp() {
-  const h = await headers();
-  return h.get("x-forwarded-for")?.split(",")[0].trim() || h.get("x-real-ip") || "local";
-}
 
 export async function getPublicAvailability(
   slug: string,

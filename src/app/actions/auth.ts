@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
+import { clientIp } from "@/lib/client-ip";
 import { createSession, deleteSession } from "@/lib/session";
 import type { Me } from "@/lib/types";
 
@@ -50,36 +51,74 @@ export async function login(_prev: AuthFormState, formData: FormData): Promise<A
   redirect(safeRedirect(values.desde, home));
 }
 
-export async function registerClinic(
-  _prev: AuthFormState,
-  formData: FormData,
-): Promise<AuthFormState> {
-  const values = read(formData, "clinicName", "city", "phone", "ownerName", "email");
-  const password = String(formData.get("password") ?? "");
-  if (password.length < 8) {
-    return { error: "La contraseña debe tener al menos 8 caracteres", values };
+export type RegisterInput = {
+  clinicName: string;
+  city: string;
+  phone: string;
+  ownerName: string;
+  email: string;
+  password: string;
+};
+
+/** Valida los datos del registro antes de enviar el código (los mismos que exige el backend). */
+function registerError(d: RegisterInput) {
+  if (d.clinicName.trim().length < 3) return "El nombre de la clínica debe tener al menos 3 caracteres";
+  if (d.ownerName.trim().length < 3) return "Escribe tu nombre completo";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email.trim())) return "Escribe un correo válido";
+  if (d.password.length < 8) return "La contraseña debe tener al menos 8 caracteres";
+  return null;
+}
+
+/** Paso 1 del registro: envía un código de 6 dígitos al correo. */
+export async function requestRegisterCode(data: RegisterInput): Promise<{ ok: true } | { ok: false; error: string }> {
+  const error = registerError(data);
+  if (error) return { ok: false, error };
+  try {
+    await api("/auth/register-clinic/code", {
+      method: "POST",
+      body: { email: data.email.trim() },
+      auth: false,
+      clientIp: await clientIp(),
+    });
+  } catch (e) {
+    return { ok: false, error: e instanceof ApiError ? e.message : "No se pudo enviar el código" };
   }
+  return { ok: true };
+}
+
+/**
+ * Paso 2 del registro: crea la clínica con el código recibido e inicia sesión.
+ * No redirige: el formulario muestra la animación de éxito y luego va al panel.
+ */
+export async function registerClinic(
+  data: RegisterInput & { code: string },
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const error = registerError(data);
+  if (error) return { ok: false, error };
+  if (!/^\d{6}$/.test(data.code)) return { ok: false, error: "Escribe los 6 dígitos del código" };
 
   let session: Session;
   try {
     session = await api<Session>("/auth/register-clinic", {
       method: "POST",
       body: {
-        clinicName: values.clinicName,
-        ownerName: values.ownerName,
-        email: values.email,
-        password,
-        city: values.city || undefined,
-        phone: values.phone || undefined,
+        clinicName: data.clinicName.trim(),
+        ownerName: data.ownerName.trim(),
+        email: data.email.trim(),
+        password: data.password,
+        city: data.city.trim() || undefined,
+        phone: data.phone.trim() || undefined,
+        code: data.code,
       },
       auth: false,
+      clientIp: await clientIp(),
     });
   } catch (e) {
-    return { error: e instanceof ApiError ? e.message : "No se pudo crear la clínica", values };
+    return { ok: false, error: e instanceof ApiError ? e.message : "No se pudo crear la clínica" };
   }
 
   await createSession(session.token);
-  redirect("/panel?bienvenida=1");
+  return { ok: true };
 }
 
 export async function logout() {

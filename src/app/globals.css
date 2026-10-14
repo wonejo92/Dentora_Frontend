@@ -158,3 +158,76 @@ body {
   background: var(--color-canvas);
   color: var(--color-ink);
 }
+
+/* ─── Animación de verificación (registro con código) ─── */
+
+@keyframes verify-spin {
+  to { transform: rotate(360deg); }
+}
+/* El anillo se dibuja y se borra mientras gira. */
+@keyframes verify-dash {
+  0% { stroke-dasharray: 1 260; stroke-dashoffset: 0; }
+  50% { stroke-dasharray: 200 260; stroke-dashoffset: -30; }
+  100% { stroke-dasharray: 200 260; stroke-dashoffset: -250; }
+}
+/* El sello aparece con un pequeño rebote. */
+@keyframes verify-pop {
+  0% { transform: scale(0.2); opacity: 0; }
+  60% { transform: scale(1.12); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes verify-check {
+  to { stroke-dashoffset: 0; }
+}
+/* Destellos que salen del sello y se desvanecen. */
+@keyframes verify-ray {
+  0% { opacity: 0; transform: translateY(0) scaleY(0.4); }
+  30% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-14px) scaleY(1); }
+}
+
+.verify-ring {
+  transform-origin: 60px 60px;
+  animation: verify-spin 1.4s linear infinite;
+}
+.verify-ring circle {
+  animation: verify-dash 1.4s ease-in-out infinite;
+}
+.verify-badge {
+  transform-origin: 60px 60px;
+  animation: verify-pop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.verify-check {
+  stroke-dasharray: 60;
+  stroke-dashoffset: 60;
+  animation: verify-check 0.5s 0.55s ease-out forwards;
+}
+.verify-ray {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: verify-ray 0.9s 0.4s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .verify-ring,
+  .verify-ring circle,
+  .verify-badge,
+  .verify-check,
+  .verify-ray {
+    animation: none;
+  }
+  .verify-check { stroke-dashoffset: 0; }
+}
+
+/* ─── Landing: única animación, la vista del panel aparece al cargar ─── */
+@keyframes landing-rise {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
+}
+.landing-rise {
+  animation: landing-rise 0.9s 0.15s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-rise { animation: none; }
+}
