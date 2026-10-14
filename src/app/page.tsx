@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { Newsreader } from "next/font/google";
 import Link from "next/link";
+import { DemoForm } from "@/components/landing/demo-form";
+import { GlassTooth } from "@/components/landing/glass-tooth";
 import { DashboardMockup, PhoneBookingMockup, ToothGlyph } from "@/components/landing/mockups";
+import { PlanCalculator } from "@/components/landing/plan-calculator";
+import { Tooth3D } from "@/components/landing/tooth-3d";
 import {
   CalendarCheckIcon,
   CashIcon,
@@ -123,6 +127,7 @@ const FAQ = [
 export default async function LandingPage() {
   const loggedIn = !!(await getSessionToken());
   const whatsapp = whatsappLink(process.env.CONTACT_WHATSAPP ?? null);
+  const whatsappBase = whatsapp;
   const whatsappHref = whatsapp
     ? `${whatsapp}?text=${encodeURIComponent("Hola, quiero saber más sobre Dentora para mi clínica.")}`
     : null;
@@ -168,41 +173,54 @@ export default async function LandingPage() {
         </div>
       </nav>
 
-      {/* ─── Portada ─── */}
-      <header className="mx-auto grid max-w-6xl items-center gap-14 px-5 pt-10 pb-20 sm:px-8 lg:grid-cols-[1.05fr_1fr] lg:pt-14 lg:pb-28">
-        <div>
-          <h1 className={cn(title, "text-[2.6rem] leading-[1.06] sm:text-6xl lg:text-[3.6rem] xl:text-[4.1rem]")}>
-            La agenda de tu clínica dental, en orden y abierta día y noche
-          </h1>
-          <p className="mt-6 max-w-[34rem] text-lg leading-relaxed text-muted">
-            Citas, reservas online, historia clínica, presupuestos y caja en un solo sistema. Menos llamadas y
-            cuadernos, más tiempo para tus pacientes.
-          </p>
-          <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-4">
-            <Link
-              href={loggedIn ? "/panel" : "/registro"}
-              className="rounded-full bg-night-900 px-7 py-3.5 text-sm font-semibold text-white hover:bg-night-800"
-            >
-              {loggedIn ? "Ir a mi panel" : "Empieza tu prueba de 14 días"}
-            </Link>
-            {whatsappHref && (
-              <a
-                href={whatsappHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-sm font-semibold text-brand-600 hover:text-night-900"
-              >
-                <WhatsappIcon /> Hablemos por WhatsApp
-              </a>
-            )}
-          </div>
-          <p className="mt-4 text-sm text-muted">Sin tarjeta de crédito. Tu clínica lista en dos minutos.</p>
-        </div>
+      {/* ─── Portada: el diente de cristal es el elemento central ─── */}
+      <header className="relative overflow-hidden">
+        {/* "dentora" gigante y tenue de fondo */}
+        <p
+          aria-hidden
+          className={cn(
+            serif.className,
+            "pointer-events-none absolute inset-x-0 -bottom-[0.18em] text-center text-[24vw] leading-none tracking-[-0.05em] text-brand-500/[0.05] select-none lg:text-[17rem]",
+          )}
+        >
+          dentora
+        </p>
 
-        {/* Vista del panel sobre una base petróleo */}
-        <div className="landing-rise relative">
-          <div aria-hidden className="absolute inset-x-6 -bottom-6 top-10 rounded-[2rem] bg-night-900" />
-          <DashboardMockup className="relative" />
+        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-5 pt-8 pb-20 sm:px-8 lg:grid-cols-[1fr_auto_1fr] lg:gap-6 lg:pt-12 lg:pb-32">
+          <h1 className={cn(title, "text-[2.6rem] leading-[1.05] sm:text-6xl lg:text-[3.4rem] xl:text-[3.9rem]")}>
+            Cada sonrisa empieza con una agenda en orden
+          </h1>
+
+          <Tooth3D className="landing-rise mx-auto w-64 sm:w-80 lg:w-[23rem] xl:w-[26rem]" />
+
+          <div className="lg:pl-6">
+            <p className={cn(serif.className, "text-3xl leading-tight text-ink sm:text-[2.1rem]")}>
+              El sistema para tu clínica dental
+            </p>
+            <p className="mt-4 leading-relaxed text-muted">
+              Citas, reservas online, historia clínica, presupuestos y caja en un solo lugar. Menos llamadas y
+              cuadernos, más tiempo para tus pacientes.
+            </p>
+            <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">
+              <Link
+                href={loggedIn ? "/panel" : "/registro"}
+                className="rounded-full bg-night-900 px-6 py-3.5 text-sm font-semibold text-white hover:bg-night-800"
+              >
+                {loggedIn ? "Ir a mi panel" : "Empieza tu prueba de 14 días"}
+              </Link>
+              {whatsappHref && (
+                <a
+                  href={whatsappHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-brand-600 hover:text-night-900"
+                >
+                  <WhatsappIcon /> WhatsApp
+                </a>
+              )}
+            </div>
+            <p className="mt-3 text-sm text-muted">Sin tarjeta de crédito.</p>
+          </div>
         </div>
       </header>
 
@@ -223,21 +241,45 @@ export default async function LandingPage() {
       </div>
 
       <main>
+        {/* ─── Así se ve el panel ─── */}
+        <section className="mx-auto max-w-6xl px-5 pt-24 sm:px-8">
+          <div className="grid items-end gap-6 lg:grid-cols-2">
+            <h2 className={cn(title, "text-4xl leading-tight sm:text-5xl")}>Todo tu día, de un vistazo</h2>
+            <p className="text-lg leading-relaxed text-muted lg:pb-2">
+              Al abrir Dentora ves las citas de hoy, la próxima consulta, lo que falta confirmar y cómo va el mes.
+            </p>
+          </div>
+          <div className="relative mt-12">
+            <div aria-hidden className="absolute inset-x-8 -bottom-6 top-12 rounded-[2rem] bg-night-900" />
+            <DashboardMockup className="relative" />
+          </div>
+        </section>
+
         {/* ─── Funciones ─── */}
         <section id="funciones" className="mx-auto max-w-6xl scroll-mt-6 px-5 py-24 sm:px-8">
           <div className="max-w-2xl">
             <h2 className={cn(title, "text-4xl leading-tight sm:text-5xl")}>Todo el consultorio en un solo lugar</h2>
             <p className="mt-4 text-lg text-muted">Pensado con dentistas para el trabajo de cada día.</p>
           </div>
-          <div className="mt-14 grid gap-x-16 md:grid-cols-2">
+          {/* Al pasar el mouse (o con el teclado) la tarjeta se ensancha y muestra su descripción. */}
+          <div className="mt-14 flex flex-col gap-3 lg:h-[23rem] lg:flex-row">
             {FEATURES.map((f) => (
-              <div key={f.title} className="flex gap-5 border-t border-line py-7">
-                <span className="mt-0.5 shrink-0 text-brand-500">{f.icon}</span>
-                <div>
-                  <h3 className="font-semibold">{f.title}</h3>
-                  <p className="mt-1.5 text-[0.95rem] leading-relaxed text-muted">{f.text}</p>
+              <article
+                key={f.title}
+                tabIndex={0}
+                className="group relative flex flex-col justify-between overflow-hidden rounded-[1.75rem] bg-night-900 p-6 text-white lg:p-5 xl:p-6 transition-[flex-grow] duration-500 ease-out focus-visible:ring-4 focus-visible:ring-brand-200 focus-visible:outline-none lg:min-w-0 lg:flex-1 lg:hover:flex-[2.4] lg:focus-within:flex-[2.4] lg:focus:flex-[2.4]"
+              >
+                <GlassTooth className="pointer-events-none absolute -right-10 -bottom-12 w-36 opacity-20 transition-opacity duration-500 group-hover:opacity-35" />
+                <span className="relative flex size-11 items-center justify-center rounded-2xl bg-white/10 text-brand-200">
+                  {f.icon}
+                </span>
+                <div className="relative mt-6 lg:mt-0">
+                  <h3 className={cn(serif.className, "text-2xl leading-tight lg:text-xl xl:text-2xl")}>{f.title}</h3>
+                  <p className="mt-2 max-w-[24rem] text-sm leading-relaxed text-night-200 lg:max-h-0 lg:opacity-0 lg:transition-all lg:duration-500 lg:group-hover:max-h-40 lg:group-hover:opacity-100 lg:group-focus:max-h-40 lg:group-focus:opacity-100">
+                    {f.text}
+                  </p>
                 </div>
-              </div>
+              </article>
             ))}
           </div>
         </section>
@@ -295,7 +337,11 @@ export default async function LandingPage() {
                 Precios mensuales en dólares. Cualquier plan empieza con 14 días gratis.
               </p>
             </div>
-            <div className="mt-14 grid items-stretch gap-6 md:grid-cols-3">
+            <div className="mt-12">
+              <PlanCalculator serifClass={serif.className} />
+            </div>
+            <p className="mt-16 mb-6 font-semibold">O compara los planes</p>
+            <div className="grid items-stretch gap-6 md:grid-cols-3">
               {PLANS.map((p) => (
                 <article
                   key={p.name}
@@ -367,62 +413,67 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* ─── Cierre y contacto ─── */}
-        <section className="border-t border-line">
-          <div className="mx-auto max-w-6xl px-5 py-24 sm:px-8">
-            <h2 className={cn(title, "max-w-3xl text-4xl leading-tight sm:text-6xl")}>
-              Empieza hoy y recibe tu primera reserva online esta semana
-            </h2>
-            <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-4">
+        {/* ─── Cierre: pedir una demo ─── */}
+        <section className="bg-night-900 text-white">
+          <div className="mx-auto grid max-w-6xl gap-12 px-5 py-24 sm:px-8 lg:grid-cols-[1fr_1.1fr] lg:items-end">
+            <div>
+              <h2 className={cn(serif.className, "text-4xl leading-tight font-normal tracking-[-0.02em] sm:text-5xl")}>
+                Te mostramos Dentora con tu clínica
+              </h2>
+              <p className="mt-5 max-w-[30rem] text-lg leading-relaxed text-night-200">
+                Cuéntanos de tu consultorio y agendamos una demo. O empieza solo: tu prueba de 14 días está a dos
+                minutos.
+              </p>
               <Link
                 href="/registro"
-                className="rounded-full bg-night-900 px-7 py-3.5 text-sm font-semibold text-white hover:bg-night-800"
+                className="mt-7 inline-block text-sm font-semibold text-brand-200 underline-offset-4 hover:underline"
+              >
+                Crear mi cuenta ahora
+              </Link>
+            </div>
+            {whatsappBase || email ? (
+              <DemoForm whatsappBase={whatsappBase} email={email} />
+            ) : (
+              <Link
+                href="/registro"
+                className="justify-self-start rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-[#073b49] hover:bg-brand-50"
               >
                 Empieza tu prueba de 14 días
               </Link>
-              {whatsappHref && (
-                <a
-                  href={whatsappHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-sm font-semibold text-brand-600 hover:text-night-900"
-                >
-                  <WhatsappIcon /> Escríbenos por WhatsApp
-                </a>
-              )}
-              {email && (
-                <a
-                  href={`mailto:${email}?subject=${encodeURIComponent("Quiero conocer Dentora")}`}
-                  className="text-sm font-semibold text-brand-600 hover:text-night-900"
-                >
-                  {email}
-                </a>
-              )}
-            </div>
+            )}
           </div>
         </section>
       </main>
 
-      <footer className="bg-night-900 text-night-200">
-        <div className="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-10 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-8">
-          <p className="flex items-center gap-2.5">
-            <ToothGlyph className="size-4 text-white" />
-            <span className="font-bold text-white">dentora</span>
-            <span>Software para clínicas dentales, hecho en Ecuador.</span>
-          </p>
-          <nav className="flex gap-6">
-            <Link href="/login" className="hover:text-white">
-              Iniciar sesión
-            </Link>
-            <Link href="/registro" className="hover:text-white">
-              Prueba gratis
-            </Link>
-            {email && (
-              <a href={`mailto:${email}`} className="hover:text-white">
-                Contacto
-              </a>
+      <footer className="overflow-hidden border-t border-white/10 bg-night-900 text-night-200">
+        <div className="mx-auto max-w-6xl px-5 pt-12 sm:px-8">
+          <div className="flex flex-col gap-6 text-sm sm:flex-row sm:items-center sm:justify-between">
+            <p>Software para clínicas dentales, hecho en Ecuador.</p>
+            <nav className="flex gap-6">
+              <Link href="/login" className="hover:text-white">
+                Iniciar sesión
+              </Link>
+              <Link href="/registro" className="hover:text-white">
+                Prueba gratis
+              </Link>
+              {email && (
+                <a href={`mailto:${email}`} className="hover:text-white">
+                  Contacto
+                </a>
+              )}
+            </nav>
+          </div>
+          {/* Logo gigante de cierre */}
+          <p
+            aria-hidden
+            className={cn(
+              serif.className,
+              "mt-10 -mb-[0.22em] flex items-center gap-[0.12em] text-[22vw] leading-none tracking-[-0.05em] text-white lg:text-[15rem]",
             )}
-          </nav>
+          >
+            <ToothGlyph className="size-[0.6em] shrink-0 text-brand-200" />
+            dentora
+          </p>
         </div>
       </footer>
     </div>
