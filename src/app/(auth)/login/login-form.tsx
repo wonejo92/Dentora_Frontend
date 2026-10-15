@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { login, type AuthFormState } from "@/app/actions/auth";
 import { Alert } from "@/components/ui/alert";
@@ -22,13 +23,20 @@ export function LoginForm({ desde }: { desde?: string }) {
         defaultValue={state.values?.email}
         required
       />
-      <Field
-        label="Contraseña"
-        name="password"
-        type="password"
-        autoComplete="current-password"
-        required
-      />
+      <div className="space-y-1.5">
+        <Field
+          label="Contraseña"
+          name="password"
+          type="password"
+          autoComplete="current-password"
+          required
+        />
+        <div className="text-right">
+          <Link href="/recuperar" className="text-sm font-semibold text-brand-500 hover:text-brand-600">
+            ¿Olvidaste tu contraseña?
+          </Link>
+        </div>
+      </div>
       <Button type="submit" disabled={pending} className="w-full">
         {pending ? "Ingresando…" : "Iniciar sesión"}
       </Button>

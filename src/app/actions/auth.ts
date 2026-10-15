@@ -125,3 +125,48 @@ export async function logout() {
   await deleteSession();
   redirect("/login");
 }
+
+const isEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
+/** Recuperar contraseña, paso 1: pide el código. Siempre responde igual, exista o no el correo. */
+export async function requestPasswordReset(email: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (!isEmail(email)) return { ok: false, error: "Escribe un correo válido" };
+  try {
+    await api("/auth/password/forgot", {
+      method: "POST",
+      body: { email: email.trim() },
+      auth: false,
+      clientIp: await clientIp(),
+    });
+  } catch (e) {
+    return { ok: false, error: e instanceof ApiError ? e.message : "No se pudo enviar el código" };
+  }
+  return { ok: true };
+}
+
+/** Recuperar contraseña, paso 2: cambia la contraseña con el código e inicia sesión. */
+export async function resetPassword(input: {
+  email: string;
+  code: string;
+  newPassword: string;
+}): Promise<{ ok: true; home: string } | { ok: false; error: string }> {
+  if (!/^\d{6}$/.test(input.code)) return { ok: false, error: "Escribe los 6 dígitos del código" };
+  if (input.newPassword.length < 8) {
+    return { ok: false, error: "La contraseña nueva debe tener al menos 8 caracteres" };
+  }
+
+  let session: Session;
+  try {
+    session = await api<Session>("/auth/password/reset", {
+      method: "POST",
+      body: { email: input.email.trim(), code: input.code, newPassword: input.newPassword },
+      auth: false,
+      clientIp: await clientIp(),
+    });
+  } catch (e) {
+    return { ok: false, error: e instanceof ApiError ? e.message : "No se pudo cambiar la contraseña" };
+  }
+
+  await createSession(session.token);
+  return { ok: true, home: session.user.role === "SUPER_ADMIN" ? "/admin" : "/panel" };
+}

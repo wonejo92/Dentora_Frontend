@@ -3,7 +3,7 @@ import { decodeJwt } from "jose";
 import { SESSION_COOKIE } from "@/lib/constants";
 
 const PROTECTED = ["/panel", "/admin", "/imprimir"];
-const AUTH_PAGES = ["/login", "/registro"];
+const AUTH_PAGES = ["/login", "/registro", "/recuperar"];
 
 /**
  * Chequeo optimista: solo mira si hay un token sin expirar.
