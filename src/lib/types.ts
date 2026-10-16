@@ -65,6 +65,10 @@ export interface AdminClinic {
   trialEndsAt: string | null;
   createdAt: string;
   _count: { patients: number; appointments: number; doctors: number; users: number };
+  whatsapp: string | null;
+  primaryColor: string;
+  /** La cita o el paciente registrado más reciente. */
+  lastActivityAt: string | null;
 }
 
 export interface DashboardSummary {
@@ -438,4 +442,27 @@ export interface ReportSummary {
   }[];
   budgets: { approvedCount: number; approvedTotal: string; acceptanceRate: number | null };
   receivable: string;
+}
+
+/** Ficha de una clínica para el super-admin (GET /admin/clinics/:id). */
+export interface AdminClinicDetail {
+  id: string;
+  name: string;
+  slug: string;
+  city: string | null;
+  address: string | null;
+  email: string | null;
+  phone: string | null;
+  whatsapp: string | null;
+  logoUrl: string | null;
+  primaryColor: string;
+  timezone: string;
+  status: ClinicStatus;
+  plan: "BASIC" | "PRO" | "CLINIC";
+  trialEndsAt: string | null;
+  createdAt: string;
+  owners: { id: string; fullName: string; email: string; isActive: boolean }[];
+  _count: { patients: number; appointments: number; doctors: number; users: number; treatments: number };
+  appointmentsThisMonth: number;
+  lastActivityAt: string | null;
 }

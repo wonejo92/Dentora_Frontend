@@ -175,3 +175,24 @@ export const CashIcon = () => (
     <path d="M6 9.5v.01M18 14.5v.01" />
   </svg>
 );
+export const ArrowUpRightIcon = () => (
+  <svg {...base}>
+    <path d="M7 17 17 7M8 7h9v9" />
+  </svg>
+);
+export const MailIcon = () => (
+  <svg {...base}>
+    <rect x="3" y="5" width="18" height="14" rx="2" />
+    <path d="m3 7 9 6 9-6" />
+  </svg>
+);
+export const PhoneIcon = () => (
+  <svg {...base}>
+    <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2" />
+  </svg>
+);
+export const ArrowLeftIcon = () => (
+  <svg {...base}>
+    <path d="M19 12H5M11 6l-6 6 6 6" />
+  </svg>
+);
