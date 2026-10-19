@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { voidPayment } from "@/app/actions/billing";
 import { Button } from "@/components/ui/button";
 import { controlClass } from "@/components/ui/field";
@@ -19,8 +20,9 @@ export function VoidPaymentDialog({ payment, onClose }: { payment: Payment; onCl
   const confirm = () =>
     startTransition(async () => {
       const result = await voidPayment(payment.id, reason);
-      if (result.ok) onClose();
-      else setError(result.error);
+      if (!result.ok) return setError(result.error);
+      onClose();
+      toast.success("Pago anulado");
     });
 
   return (

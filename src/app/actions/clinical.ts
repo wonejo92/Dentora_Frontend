@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { api, ApiError } from "@/lib/api";
 import { guard } from "@/lib/dal";
+import type { OdontogramData } from "@/lib/odontogram";
 import type { Diagnosis, Vitals } from "@/lib/types";
 import type { ActionResult } from "./appointments";
 
@@ -89,6 +90,16 @@ export async function addAddendum(patientId: string, noteId: string, text: strin
     api(`/clinical-notes/${noteId}/addenda`, {
       method: "POST",
       body: { text: text.trim() },
+    }),
+  );
+}
+
+/** Guarda el odontograma como una versión nueva (las anteriores no se modifican). */
+export async function saveOdontogram(patientId: string, input: OdontogramData & { note?: string }) {
+  return mutate(patientId, () =>
+    api(`/patients/${patientId}/odontogram`, {
+      method: "POST",
+      body: { ...input, note: input.note?.trim() || undefined },
     }),
   );
 }

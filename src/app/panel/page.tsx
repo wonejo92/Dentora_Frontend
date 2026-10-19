@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { confirmAppointment } from "@/app/actions/appointments";
 import { BalanceBadge } from "@/components/billing/balance-badge";
@@ -9,13 +10,14 @@ import {
   ClockIcon,
   WorldIcon,
 } from "@/components/panel/icons";
+import { OnboardingChecklist } from "@/components/panel/onboarding-checklist";
 import { WeeklyChart } from "@/components/panel/weekly-chart";
-import { Alert } from "@/components/ui/alert";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { api } from "@/lib/api";
 import { guard, requireClinicUser } from "@/lib/dal";
+import { hasFeature } from "@/lib/plan-limits";
 import { formatTime, localDate } from "@/lib/time";
-import type { Appointment, DashboardSummary } from "@/lib/types";
+import type { Appointment, DashboardSummary, OnboardingStatus } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Resumen" };
 
@@ -26,21 +28,22 @@ const monthName = (date: string, offset = 0) => {
   );
 };
 
-export default async function DashboardPage({ searchParams }: PageProps<"/panel">) {
+export default async function DashboardPage() {
   const me = await requireClinicUser();
   const tz = me.clinic.timezone;
-  const { bienvenida } = await searchParams;
-  const data = await guard(api<DashboardSummary>("/dashboard"));
+  const isOwner = me.role === "OWNER";
+  const [data, onboarding, h] = await Promise.all([
+    guard(api<DashboardSummary>("/dashboard")),
+    isOwner ? guard(api<OnboardingStatus>("/clinic/onboarding")) : null,
+    headers(),
+  ]);
+  // El dominio sale de la petición, así el enlace es correcto en local y en producción.
+  const bookingUrl = `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host")}/${me.clinic.slug}/reservar`;
   const { month } = data;
 
   return (
     <div className="w-full space-y-4">
-      {bienvenida && (
-        <Alert tone="info">
-          ¡Bienvenido a Dentora! Empieza agregando tus tratamientos y doctores para abrir la
-          agenda.
-        </Alert>
-      )}
+      {onboarding && <OnboardingChecklist status={onboarding} bookingUrl={bookingUrl} />}
 
       <section className="rounded-3xl bg-surface p-5 sm:p-7">
         <p className="text-muted">Citas en {monthName(data.today)}</p>
@@ -130,7 +133,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/panel"
                       <StatusBadge status={a.status} />
                     </td>
                     <td className="py-3 text-right">
-                      <AppointmentActions appointment={a} timeZone={tz} canChart={me.role === "OWNER" || me.role === "DOCTOR"} />
+                      <AppointmentActions appointment={a} timeZone={tz} canChart={(me.role === "OWNER" || me.role === "DOCTOR") && hasFeature(me, "clinical")} />
                     </td>
                   </tr>
                 ))}

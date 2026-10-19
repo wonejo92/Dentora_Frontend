@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { toast } from "sonner";
 import { createTimeOff, type TimeOffState } from "@/app/actions/time-offs";
 import { Button } from "@/components/ui/button";
 import { Field, Select } from "@/components/ui/field";
@@ -50,7 +51,10 @@ function TimeOffForm({
   const [reason, setReason] = useState("");
   const { state, pending, onSubmit } = useFormAction<TimeOffState>(async (prev, formData) => {
     const result = await createTimeOff(prev, formData);
-    if (result.ok && !result.conflicts?.length) onClose();
+    if (result.ok && !result.conflicts?.length) {
+      onClose();
+      toast.success("Bloqueo registrado");
+    }
     return result;
   }, {});
 

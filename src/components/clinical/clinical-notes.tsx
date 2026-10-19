@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { addAddendum, saveClinicalNote, type NoteInput } from "@/app/actions/clinical";
 import { ClipboardIcon, LockIcon, PencilIcon } from "@/components/panel/icons";
 import { Button } from "@/components/ui/button";
@@ -371,6 +372,7 @@ function AddendumForm({ patientId, noteId }: { patientId: string; noteId: string
       if (!result.ok) return setError(result.error);
       setText("");
       setOpen(false);
+      toast.success("Aclaración agregada");
     });
 
   return (
@@ -462,8 +464,9 @@ function NoteDialog({
     setError(undefined);
     startTransition(async () => {
       const result = await saveClinicalNote(patientId, note?.id ?? null, form);
-      if (result.ok) onClose();
-      else setError(result.error);
+      if (!result.ok) return setError(result.error);
+      onClose();
+      toast.success(note ? "Evolución actualizada" : "Evolución registrada");
     });
   };
 

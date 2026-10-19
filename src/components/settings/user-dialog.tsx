@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { saveUser, type SettingsState } from "@/app/actions/settings";
 import { Button } from "@/components/ui/button";
 import { Field, Select, Switch } from "@/components/ui/field";
@@ -16,15 +17,21 @@ const ROLES: { value: Exclude<Role, "SUPER_ADMIN">; label: string; description: 
   { value: "OWNER", label: "Dueño", description: "Acceso total, incluidos los ajustes." },
 ];
 
+/** Roles que el plan Básico no incluye. */
+const SUPPORT_ROLES: Role[] = ["RECEPTIONIST", "ASSISTANT"];
+
 export function UserDialog({
   user,
   isSelf,
+  supportStaff = true,
   triggerClassName,
   children,
 }: {
   user?: StaffUser;
   /** El usuario que está editando su propia cuenta: no puede cambiarse el rol ni desactivarse. */
   isSelf?: boolean;
+  /** El plan permite usuarios de recepción y asistentes. */
+  supportStaff?: boolean;
   triggerClassName: string;
   children: React.ReactNode;
 }) {
@@ -40,16 +47,31 @@ export function UserDialog({
         title={user ? "Editar usuario" : "Nuevo usuario"}
         description={user ? user.email : "La persona entrará con este correo y contraseña."}
       >
-        <UserForm user={user} isSelf={isSelf} onDone={() => setOpen(false)} />
+        <UserForm user={user} isSelf={isSelf} supportStaff={supportStaff} onDone={() => setOpen(false)} />
       </Modal>
     </>
   );
 }
 
-function UserForm({ user: u, isSelf, onDone }: { user?: StaffUser; isSelf?: boolean; onDone: () => void }) {
+function UserForm({
+  user: u,
+  isSelf,
+  supportStaff,
+  onDone,
+}: {
+  user?: StaffUser;
+  isSelf?: boolean;
+  supportStaff: boolean;
+  onDone: () => void;
+}) {
+  // Sin recepción en el plan: se ocultan esos roles (salvo el que ya tiene el usuario).
+  const roles = ROLES.filter((r) => supportStaff || !SUPPORT_ROLES.includes(r.value) || r.value === u?.role);
   const { state, pending, onSubmit } = useFormAction<SettingsState>(async (prev, formData) => {
     const result = await saveUser(prev, formData);
-    if (result.ok) onDone();
+    if (result.ok) {
+      onDone();
+      toast.success(u ? "Usuario actualizado" : "Usuario creado");
+    }
     return result;
   }, {});
 
@@ -78,13 +100,16 @@ function UserForm({ user: u, isSelf, onDone }: { user?: StaffUser; isSelf?: bool
         </p>
       ) : (
         <>
-          <Select label="Rol" name="role" defaultValue={u?.role ?? "RECEPTIONIST"}>
-            {ROLES.map((r) => (
+          <Select label="Rol" name="role" defaultValue={u?.role ?? (supportStaff ? "RECEPTIONIST" : "DOCTOR")}>
+            {roles.map((r) => (
               <option key={r.value} value={r.value}>
                 {r.label} — {r.description}
               </option>
             ))}
           </Select>
+          {!supportStaff && (
+            <p className="-mt-2 text-xs text-muted">Recepción y asistentes están disponibles desde el plan Pro.</p>
+          )}
           {u && (
             <>
               <input type="hidden" name="isActiveField" value="1" />

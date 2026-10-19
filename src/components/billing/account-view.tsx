@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { changeBudgetStatus, completeBudgetItem, deleteBudget } from "@/app/actions/billing";
 import { Button, buttonClass } from "@/components/ui/button";
 import { FormError } from "@/components/ui/form-error";
@@ -210,7 +211,21 @@ function PaymentRow({
   );
 }
 
-type Confirm = { title: string; text: string; action: string; run: () => Promise<{ ok: boolean; error?: string }> };
+type Confirm = {
+  title: string;
+  text: string;
+  action: string;
+  /** Mensaje del toast al terminar ("Presupuesto anulado"). */
+  done: string;
+  run: () => Promise<{ ok: boolean; error?: string }>;
+};
+
+/** Toast al cambiar el estado de un presupuesto. */
+const STATUS_DONE: Partial<Record<BudgetStatus, string>> = {
+  APPROVED: "Presupuesto aprobado",
+  REJECTED: "Presupuesto rechazado",
+  DRAFT: "Presupuesto devuelto a borrador",
+};
 
 function BudgetCard({
   budget: b,
@@ -237,7 +252,12 @@ function BudgetCard({
       if (!result.ok) setError(result.error);
     });
   };
-  const setStatus = (status: BudgetStatus) => run(() => changeBudgetStatus(b.id, status));
+  const setStatus = (status: BudgetStatus) =>
+    run(async () => {
+      const result = await changeBudgetStatus(b.id, status);
+      if (result.ok) toast.success(STATUS_DONE[status] ?? "Presupuesto actualizado");
+      return result;
+    });
 
   const approved = b.status === "APPROVED";
   const paidPct = Number(b.total) > 0 ? Math.min(100, (Number(b.paid) / Number(b.total)) * 100) : 0;
@@ -408,6 +428,7 @@ function BudgetCard({
                     title: `Eliminar presupuesto #${b.number}`,
                     text: "Se borra por completo. Esta acción no se puede deshacer.",
                     action: "Eliminar",
+                    done: "Presupuesto eliminado",
                     run: () => deleteBudget(b.id),
                   })
                 }
@@ -425,6 +446,7 @@ function BudgetCard({
                     title: `Anular presupuesto #${b.number}`,
                     text: "Queda en el historial como anulado y deja de sumar al saldo del paciente.",
                     action: "Anular",
+                    done: "Presupuesto anulado",
                     run: () => changeBudgetStatus(b.id, "CANCELLED"),
                   })
                 }
@@ -491,8 +513,9 @@ function ConfirmDialog({ confirm, onClose }: { confirm: Confirm; onClose: () => 
   const go = () =>
     startTransition(async () => {
       const result = await confirm.run();
-      if (result.ok) onClose();
-      else setError(result.error);
+      if (!result.ok) return setError(result.error);
+      onClose();
+      toast.success(confirm.done);
     });
   return (
     <Modal

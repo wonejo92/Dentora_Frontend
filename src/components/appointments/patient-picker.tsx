@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { savePatient, type PatientFormState } from "@/app/actions/patients";
 import { searchPatients } from "@/app/actions/appointments";
 import { SearchIcon } from "@/components/panel/icons";
@@ -107,7 +108,10 @@ function QuickPatientForm({
 }) {
   const { state, pending, onSubmit } = useFormAction<PatientFormState>(async (prev, formData) => {
     const result = await savePatient(prev, formData);
-    if (result.ok && result.patient) onCreated(result.patient);
+    if (result.ok && result.patient) {
+      onCreated(result.patient);
+      toast.success("Paciente registrado");
+    }
     return result;
   }, {});
   // Si lo que se buscó parece un nombre, se aprovecha para prellenar el formulario.

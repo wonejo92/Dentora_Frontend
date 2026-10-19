@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
+import { toast } from "sonner";
 import { createAppointment, getBookingOptions } from "@/app/actions/appointments";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/ui/form-error";
@@ -93,6 +94,9 @@ function NewAppointmentForm({
         return;
       }
       onClose();
+      toast.success("Cita agendada", {
+        description: `${patient.firstName} ${patient.lastName} · ${treatment.name}`,
+      });
       if (afterCreate === "agenda") {
         router.push(`/panel/agenda?fecha=${localDate(new Date(slot.startsAt), timeZone)}`);
       }

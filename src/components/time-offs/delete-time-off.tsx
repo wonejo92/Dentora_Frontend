@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { deleteTimeOff } from "@/app/actions/time-offs";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/ui/form-error";
@@ -14,8 +15,9 @@ export function DeleteTimeOff({ id, label }: { id: string; label: string }) {
   const confirm = () =>
     startTransition(async () => {
       const result = await deleteTimeOff(id);
-      if (result.ok) setOpen(false);
-      else setError(result.error);
+      if (!result.ok) return setError(result.error);
+      setOpen(false);
+      toast.success("Bloqueo eliminado");
     });
 
   return (

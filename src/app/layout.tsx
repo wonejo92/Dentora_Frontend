@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { cookies } from "next/headers";
+import { Toaster } from "@/components/ui/toaster";
 import { THEME_COOKIE } from "@/lib/constants";
 import "./globals.css";
 
@@ -23,7 +24,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       data-theme={theme === "light" || theme === "dark" ? theme : undefined}
       className={`${jakarta.variable} h-full antialiased`}
     >
-      <body className="min-h-full font-sans">{children}</body>
+      <body className="min-h-full font-sans">
+        {children}
+        <Toaster />
+      </body>
     </html>
   );
 }

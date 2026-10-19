@@ -5,6 +5,7 @@ import { AppointmentActions } from "@/components/appointments/appointment-action
 import { AccountView } from "@/components/billing/account-view";
 import { BalanceBadge } from "@/components/billing/balance-badge";
 import { ClinicalNotes, type ChartableAppointment } from "@/components/clinical/clinical-notes";
+import { OdontogramEditor } from "@/components/clinical/odontogram-editor";
 import { MedicalAlertsBanner } from "@/components/clinical/medical-alerts";
 import { MedicalHistorySummary } from "@/components/clinical/medical-history-summary";
 import { NewAppointmentDialog } from "@/components/appointments/new-appointment-dialog";
@@ -13,6 +14,8 @@ import { PatientDialog } from "@/components/patients/patient-dialog";
 import { buttonClass } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { api, ApiError } from "@/lib/api";
+import type { OdontogramResponse, OdontogramVersion } from "@/lib/odontogram";
+import { hasFeature } from "@/lib/plan-limits";
 import { guard, requireClinicUser } from "@/lib/dal";
 import { ageFrom, whatsappLink } from "@/lib/format";
 import { genderLabels, idTypeLabels, initials } from "@/lib/labels";
@@ -44,13 +47,16 @@ export default async function PatientPage({ params, searchParams }: PageProps<"/
   const me = await requireClinicUser();
   const tz = me.clinic.timezone;
   const { id } = await params;
-  const { tab, cita } = await searchParams;
-  const chart = canChart(me.role);
-  const view = tab === "historia" && chart ? "historia" : tab === "cuenta" && canBill(me.role) ? "cuenta" : "resumen";
+  const { tab, cita, version } = await searchParams;
+  const chart = canChart(me.role) && hasFeature(me, "clinical");
+  const bill = canBill(me.role) && hasFeature(me, "billing");
+  const view =
+    (tab === "historia" || tab === "odontograma") && chart ? tab : tab === "cuenta" && bill ? "cuenta" : "resumen";
   const tabs = [
     { key: "resumen", href: `/panel/pacientes/${id}`, label: "Resumen" },
     ...(chart ? [{ key: "historia", href: `/panel/pacientes/${id}?tab=historia`, label: "Historia clínica" }] : []),
-    ...(canBill(me.role) ? [{ key: "cuenta", href: `/panel/pacientes/${id}?tab=cuenta`, label: "Cuenta" }] : []),
+    ...(chart ? [{ key: "odontograma", href: `/panel/pacientes/${id}?tab=odontograma`, label: "Odontograma" }] : []),
+    ...(bill ? [{ key: "cuenta", href: `/panel/pacientes/${id}?tab=cuenta`, label: "Cuenta" }] : []),
   ];
   const p = await loadPatient(id);
 
@@ -140,6 +146,8 @@ export default async function PatientPage({ params, searchParams }: PageProps<"/
 
       {view === "cuenta" ? (
         <Account patientId={p.id} role={me.role} timeZone={tz} />
+      ) : view === "odontograma" ? (
+        <Odontogram patientId={p.id} timeZone={tz} versionId={typeof version === "string" ? version : undefined} />
       ) : view === "historia" ? (
         <ClinicalHistory
           patient={p}
@@ -330,6 +338,25 @@ async function ClinicalHistory({
         openAppointmentId={openAppointmentId}
       />
     </div>
+  );
+}
+
+/** Odontograma actual, o una versión anterior si viene `?version=`. */
+async function Odontogram({ patientId, timeZone, versionId }: { patientId: string; timeZone: string; versionId?: string }) {
+  const { current, versions } = await guard(api<OdontogramResponse>(`/patients/${patientId}/odontogram`));
+  const older = versionId && versionId !== current?.id && versions.some((v) => v.id === versionId);
+  const version = older
+    ? await guard(api<OdontogramVersion>(`/patients/${patientId}/odontogram/versions/${versionId}`))
+    : current;
+  return (
+    <OdontogramEditor
+      key={version?.id ?? "nuevo"}
+      patientId={patientId}
+      version={version}
+      versions={versions}
+      isCurrent={!older}
+      timeZone={timeZone}
+    />
   );
 }
 

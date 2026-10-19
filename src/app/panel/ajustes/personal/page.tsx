@@ -14,6 +14,7 @@ export default async function StaffPage() {
   const me = await requireClinicUser();
   if (me.role !== "OWNER") return null;
   const users = await guard(api<StaffUser[]>("/users"));
+  const supportStaff = me.planLimits?.supportStaff ?? true;
   const sorted = [...users].sort((a, b) => Number(b.isActive) - Number(a.isActive));
 
   return (
@@ -22,7 +23,9 @@ export default async function StaffPage() {
         <p className="text-sm text-muted">
           {users.filter((u) => u.isActive).length} con acceso · Cada persona entra con su propio correo.
         </p>
-        <UserDialog triggerClassName={buttonClass("primary")}>+ Nuevo usuario</UserDialog>
+        <UserDialog supportStaff={supportStaff} triggerClassName={buttonClass("primary")}>
+          + Nuevo usuario
+        </UserDialog>
       </div>
 
       <section className="overflow-hidden rounded-3xl bg-surface">
@@ -80,7 +83,7 @@ export default async function StaffPage() {
                       )}
                     </td>
                     <td className="px-6 py-3 text-right">
-                      <UserDialog user={u} isSelf={isSelf} triggerClassName={buttonClass("ghost", "h-9 px-3")}>
+                      <UserDialog user={u} isSelf={isSelf} supportStaff={supportStaff} triggerClassName={buttonClass("ghost", "h-9 px-3")}>
                         Editar
                       </UserDialog>
                     </td>

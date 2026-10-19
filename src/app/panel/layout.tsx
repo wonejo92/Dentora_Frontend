@@ -15,6 +15,7 @@ import {
   UsersIcon,
 } from "@/components/panel/icons";
 import { NewAppointmentDialog } from "@/components/appointments/new-appointment-dialog";
+import { PanelTour } from "@/components/panel/panel-tour";
 import { Sidebar, type NavGroup } from "@/components/panel/sidebar";
 import { TrialBanner } from "@/components/panel/trial-banner";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
@@ -24,11 +25,16 @@ import { SIDEBAR_COOKIE } from "@/lib/constants";
 import { guard, requireClinicUser } from "@/lib/dal";
 import { initials, roleLabels } from "@/lib/labels";
 import { formatLongDate, localDate } from "@/lib/time";
-import type { Appointment, Role } from "@/lib/types";
+import { featureInfo, hasFeature } from "@/lib/plan-limits";
+import type { Appointment, Me, OnboardingStatus, PlanFeature, Role } from "@/lib/types";
 
-/** Menú según el rol: Reportes, Personal y Ajustes son solo para el dueño. */
-function navFor(role: Role): NavGroup[] {
+/**
+ * Menú según el rol: Reportes, Personal y Ajustes son solo para el dueño.
+ * Los módulos que el plan no incluye siguen visibles, con la etiqueta del plan que los trae.
+ */
+function navFor(role: Role, me: Me): NavGroup[] {
   const isOwner = role === "OWNER";
+  const badge = (feature: PlanFeature) => (hasFeature(me, feature) ? undefined : featureInfo[feature].plan);
   return [
     {
       title: "General",
@@ -44,12 +50,12 @@ function navFor(role: Role): NavGroup[] {
         { href: "/panel/pacientes", label: "Pacientes", icon: <UsersIcon /> },
         { href: "/panel/doctores", label: "Doctores", icon: <StethoscopeIcon /> },
         { href: "/panel/tratamientos", label: "Tratamientos", icon: <ToothIcon /> },
-        ...(role !== "ASSISTANT" ? [{ href: "/panel/caja", label: "Caja", icon: <CashIcon /> }] : []),
+        ...(role !== "ASSISTANT" ? [{ href: "/panel/caja", label: "Caja", icon: <CashIcon />, badge: badge("billing") }] : []),
       ],
     },
     // Reportes: datos del negocio, solo el dueño.
     ...(isOwner
-      ? [{ title: "Análisis", items: [{ href: "/panel/reportes", label: "Reportes", icon: <ChartIcon /> }] }]
+      ? [{ title: "Análisis", items: [{ href: "/panel/reportes", label: "Reportes", icon: <ChartIcon />, badge: badge("reports") }] }]
       : []),
     ...(isOwner
       ? [
@@ -79,14 +85,21 @@ async function countPending() {
 
 export default async function PanelLayout({ children }: LayoutProps<"/panel">) {
   const me = await requireClinicUser();
-  const [pending, cookieStore] = await Promise.all([countPending(), cookies()]);
+  const [pending, cookieStore, onboarding] = await Promise.all([
+    countPending(),
+    cookies(),
+    me.role === "OWNER" ? guard(api<OnboardingStatus>("/clinic/onboarding")) : null,
+  ]);
+  // "Mostrar primeros pasos" solo tiene sentido si la lista está oculta y aún falta algo.
+  const canRestoreOnboarding =
+    !!onboarding?.dismissed && Object.values(onboarding.steps).some((done) => !done);
   const collapsed = cookieStore.get(SIDEBAR_COOKIE)?.value === "collapsed";
   const today = formatLongDate(localDate(new Date(), me.clinic.timezone));
 
   return (
     <div className="min-h-screen lg:flex">
       <Sidebar
-        groups={navFor(me.role)}
+        groups={navFor(me.role, me)}
         clinicName={me.clinic.name}
         initialCollapsed={collapsed}
         user={{
@@ -95,13 +108,14 @@ export default async function PanelLayout({ children }: LayoutProps<"/panel">) {
           role: roleLabels[me.role],
           initials: initials(me.fullName),
           canManage: me.role === "OWNER",
+          canRestoreOnboarding,
         }}
       />
 
       <div className="min-w-0 flex-1">
         {me.role === "OWNER" && <TrialBanner clinic={me.clinic} />}
         <header className="flex items-center justify-between gap-2 px-4 pt-4 sm:gap-3 sm:px-8 sm:pt-6">
-          <form action="/panel/pacientes" role="search" className="hidden w-full max-w-xs md:block">
+          <form action="/panel/pacientes" role="search" data-tour="search" className="hidden w-full max-w-xs md:block">
             <label className="flex h-11 items-center gap-2 rounded-full border border-line bg-surface px-4 text-muted transition-colors focus-within:border-brand-500 focus-within:ring-4 focus-within:ring-brand-50">
               <SearchIcon />
               <span className="sr-only">Buscar paciente</span>
@@ -113,15 +127,17 @@ export default async function PanelLayout({ children }: LayoutProps<"/panel">) {
             </label>
           </form>
           <div className="ml-auto flex items-center gap-2 sm:gap-3">
-            <NewAppointmentDialog
-              timeZone={me.clinic.timezone}
-              triggerLabel="Nueva cita"
-              triggerClassName="flex size-11 items-center justify-center rounded-full bg-brand-500 text-white shadow-md shadow-brand-500/30 transition-colors hover:bg-brand-600"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </NewAppointmentDialog>
+            <span data-tour="new-appointment" className="flex rounded-full">
+              <NewAppointmentDialog
+                timeZone={me.clinic.timezone}
+                triggerLabel="Nueva cita"
+                triggerClassName="flex size-11 items-center justify-center rounded-full bg-brand-500 text-white shadow-md shadow-brand-500/30 transition-colors hover:bg-brand-600"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+              </NewAppointmentDialog>
+            </span>
             <UserMenu me={me} logout="mobile" profileHref="/panel/perfil" />
             <div className="hidden items-center gap-2 rounded-full bg-surface px-4 py-2.5 text-sm xl:flex">
               <CalendarIcon />
@@ -130,6 +146,7 @@ export default async function PanelLayout({ children }: LayoutProps<"/panel">) {
             <ThemeToggle />
             <Link
               href="/panel/agenda"
+              data-tour="bell"
               aria-label={`${pending} reservas por confirmar`}
               title="Reservas por confirmar"
               className="relative flex size-11 items-center justify-center rounded-full bg-surface text-ink transition-colors hover:bg-brand-50"
@@ -144,6 +161,7 @@ export default async function PanelLayout({ children }: LayoutProps<"/panel">) {
           </div>
         </header>
         <main className="px-4 py-6 sm:px-8">{children}</main>
+        <PanelTour autoStart={!me.tourSeenAt} firstName={me.fullName.replace(/^(dra?|lcd[oa]?)\.?\s+/i, "").split(" ")[0]} />
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { toast } from "sonner";
 import { saveClinic, type SettingsState } from "@/app/actions/settings";
 import { Field, TextArea } from "@/components/ui/field";
 import { FormError } from "@/components/ui/form-error";
@@ -13,7 +14,14 @@ const localWhatsapp = (value: string | null) =>
   value && /^5939\d{8}$/.test(value) ? `0${value.slice(3)}` : (value ?? "");
 
 export function ClinicForm({ clinic: c, siteHost }: { clinic: Clinic; siteHost: string }) {
-  const { state, pending, onSubmit } = useFormAction<SettingsState>(saveClinic, {});
+  const { state, pending, onSubmit } = useFormAction<SettingsState>(
+    async (prev, formData) => {
+      const result = await saveClinic(prev, formData);
+      if (result.ok) toast.success("Cambios guardados");
+      return result;
+    },
+    {},
+  );
   const colors = DOCTOR_COLORS.includes(c.primaryColor.toUpperCase()) ? DOCTOR_COLORS : [c.primaryColor, ...DOCTOR_COLORS];
 
   return (
@@ -114,7 +122,7 @@ export function ClinicForm({ clinic: c, siteHost }: { clinic: Clinic; siteHost: 
         />
       </SettingsCard>
 
-      <SaveBar pending={pending} saved={!!state.ok} />
+      <SaveBar pending={pending} />
     </form>
   );
 }

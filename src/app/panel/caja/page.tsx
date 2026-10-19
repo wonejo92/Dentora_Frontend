@@ -5,7 +5,9 @@ import { PaymentConcept, ReceiptLink } from "@/components/billing/account-view";
 import { VoidPaymentButton } from "@/components/billing/void-payment-button";
 import { DateInput } from "@/components/list/date-input";
 import { FilterSelect } from "@/components/list/filter-select";
+import { PlanUpgrade } from "@/components/panel/plan-upgrade";
 import { api } from "@/lib/api";
+import { hasFeature } from "@/lib/plan-limits";
 import { methodLabels, money } from "@/lib/billing";
 import { cn } from "@/lib/cn";
 import { guard, requireClinicUser } from "@/lib/dal";
@@ -29,6 +31,7 @@ const shift = (date: string, days: number) =>
 export default async function CashPage({ searchParams }: PageProps<"/panel/caja">) {
   const me = await requireClinicUser();
   if (me.role === "ASSISTANT") redirect("/panel");
+  if (!hasFeature(me, "billing")) return <PlanUpgrade feature="billing" plan={me.clinic.plan} />;
   const tz = me.clinic.timezone;
   const today = localDate(new Date(), tz);
   const sp = await searchParams;

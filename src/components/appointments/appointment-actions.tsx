@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useLayoutEffect, useRef, useState, useTransition } from "react";
+import { toast } from "sonner";
 import { changeAppointmentStatus, getBookingOptions, rescheduleAppointment } from "@/app/actions/appointments";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/ui/form-error";
@@ -49,8 +50,9 @@ export function AppointmentActions({
     closeNotice();
     startTransition(async () => {
       const result = await changeAppointmentStatus(a.id, status);
-      if (!result.ok) showNotice({ error: result.error });
-      else if (status === "COMPLETED" && canChart) showNotice("chart");
+      if (!result.ok) return showNotice({ error: result.error });
+      toast.success(STATUS_DONE[status] ?? "Cita actualizada");
+      if (status === "COMPLETED" && canChart) showNotice("chart");
     });
   };
 
@@ -233,6 +235,13 @@ const describe = (a: Appointment, timeZone: string) =>
     month: "short",
   }).format(new Date(a.startsAt))} a las ${formatTime(a.startsAt, timeZone)}`;
 
+/** Toast al cambiar el estado de una cita desde el menú. */
+const STATUS_DONE: Partial<Record<AppointmentStatus, string>> = {
+  CONFIRMED: "Cita confirmada",
+  COMPLETED: "Cita marcada como atendida",
+  NO_SHOW: "Cita marcada como no asistió",
+};
+
 const CANCEL_REASONS = ["El paciente avisó que no puede", "Reprogramará más adelante", "El doctor no está disponible"];
 
 function CancelDialog({ appointment: a, timeZone, onClose }: { appointment: Appointment; timeZone: string; onClose: () => void }) {
@@ -243,8 +252,9 @@ function CancelDialog({ appointment: a, timeZone, onClose }: { appointment: Appo
   const confirm = () =>
     startTransition(async () => {
       const result = await changeAppointmentStatus(a.id, "CANCELLED", reason.trim());
-      if (result.ok) onClose();
-      else setError(result.error);
+      if (!result.ok) return setError(result.error);
+      onClose();
+      toast.success("Cita cancelada");
     });
 
   return (
@@ -314,7 +324,10 @@ function RescheduleDialog({ appointment: a, timeZone, onClose }: { appointment: 
     if (!slot) return;
     startTransition(async () => {
       const result = await rescheduleAppointment(a.id, slot);
-      if (result.ok) return onClose();
+      if (result.ok) {
+        toast.success("Cita reprogramada");
+        return onClose();
+      }
       setError(result.error);
       setSlot(null);
       setAttempt((n) => n + 1);

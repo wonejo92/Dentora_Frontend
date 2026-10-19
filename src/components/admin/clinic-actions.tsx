@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { updateClinicAdmin } from "@/app/actions/admin";
 import { Button } from "@/components/ui/button";
 import { controlClass } from "@/components/ui/field";
@@ -12,24 +13,30 @@ import type { AdminClinicDetail } from "@/lib/types";
 
 const DAY = 864e5;
 
+/** Opción "Prueba gratis" de la lista, junto a los planes. */
+const TRIAL = "TRIAL";
+type Choice = PlanKey | typeof TRIAL;
+
+const dayMonth = (ms: number) =>
+  new Intl.DateTimeFormat("es-EC", { day: "numeric", month: "long", timeZone: "America/Guayaquil" }).format(ms);
+
 /**
- * Acciones del super-admin sobre una clínica: activar con un plan, extender la
- * prueba, cambiar de plan, suspender y reactivar.
+ * Acciones del super-admin sobre una clínica: pasarla a prueba o activarla con
+ * un plan, extender la prueba, cambiar de plan, suspender y reactivar.
  */
 export function ClinicActions({ clinic: c, now }: { clinic: AdminClinicDetail; now: number }) {
-  const [plan, setPlan] = useState<PlanKey>(c.plan);
+  const inTrial = c.status === "TRIAL";
+  const [choice, setChoice] = useState<Choice>(inTrial ? TRIAL : c.plan);
   const [confirmSuspend, setConfirmSuspend] = useState(false);
   const [error, setError] = useState<string>();
-  const [done, setDone] = useState<string>();
   const [pending, startTransition] = useTransition();
 
   const run = (body: Parameters<typeof updateClinicAdmin>[1], message: string) =>
     startTransition(async () => {
       setError(undefined);
-      setDone(undefined);
       const result = await updateClinicAdmin(c.id, body);
       if (!result.ok) return setError(result.error);
-      setDone(message);
+      toast.success(message);
       setConfirmSuspend(false);
     });
 
@@ -39,6 +46,34 @@ export function ClinicActions({ clinic: c, now }: { clinic: AdminClinicDetail; n
     run({ status: "TRIAL", trialEndsAt: new Date(base + days * DAY).toISOString() }, `Prueba extendida ${days} días`);
   };
 
+  /** Volver a prueba: conserva la fecha de fin si aún no pasa; si ya pasó, 7 días desde hoy. */
+  const trialEnd = c.trialEndsAt && Date.parse(c.trialEndsAt) > now ? Date.parse(c.trialEndsAt) : now + 7 * DAY;
+
+  /** El botón junto a la lista según lo elegido y el estado actual. */
+  const apply =
+    choice === TRIAL
+      ? {
+          label: "Pasar a prueba",
+          disabled: inTrial,
+          action: () =>
+            run(
+              { status: "TRIAL", trialEndsAt: new Date(trialEnd).toISOString() },
+              `Clínica en prueba gratis hasta el ${dayMonth(trialEnd)}`,
+            ),
+        }
+      : c.status === "ACTIVE"
+        ? {
+            label: "Cambiar plan",
+            disabled: choice === c.plan,
+            action: () => run({ plan: choice }, `Plan cambiado a ${plans[choice].label}`),
+          }
+        : {
+            label: "Activar con este plan",
+            disabled: false,
+            action: () =>
+              run({ status: "ACTIVE", plan: choice }, `Clínica activada con el plan ${plans[choice].label}`),
+          };
+
   // Al reactivar: si su prueba aún no vence vuelve a prueba; si no, queda activa.
   const reactivateAs = c.trialEndsAt && Date.parse(c.trialEndsAt) > now ? "TRIAL" : "ACTIVE";
   const suspended = c.status === "SUSPENDED";
@@ -47,11 +82,6 @@ export function ClinicActions({ clinic: c, now }: { clinic: AdminClinicDetail; n
     <section className="h-full space-y-5 rounded-[28px] bg-surface p-5 sm:p-6">
       <h2 className="text-lg font-semibold">Acciones</h2>
       <FormError message={error} />
-      {done && (
-        <p role="status" className="rounded-xl bg-green-100 px-4 py-2.5 text-sm font-medium text-green-800">
-          {done}
-        </p>
-      )}
 
       <div className="space-y-2">
         <label htmlFor="plan" className="text-sm font-medium">
@@ -60,43 +90,42 @@ export function ClinicActions({ clinic: c, now }: { clinic: AdminClinicDetail; n
         <div className="flex flex-wrap gap-2">
           <select
             id="plan"
-            value={plan}
-            onChange={(e) => setPlan(e.target.value as PlanKey)}
+            value={choice}
+            onChange={(e) => setChoice(e.target.value as Choice)}
             className={cn(controlClass(), "h-10 min-w-40")}
           >
+            <option value={TRIAL}>Prueba gratis · todo incluido</option>
             {Object.entries(plans).map(([key, p]) => (
               <option key={key} value={key}>
                 {p.label} · ${p.price}/mes
               </option>
             ))}
           </select>
-          {c.status !== "ACTIVE" && !suspended ? (
+          {!suspended && (
             <Button
               type="button"
-              disabled={pending}
-              onClick={() => run({ status: "ACTIVE", plan }, `Clínica activada con el plan ${plans[plan].label}`)}
+              variant={apply.label === "Cambiar plan" ? "secondary" : "primary"}
+              disabled={pending || apply.disabled}
+              onClick={apply.action}
             >
-              Activar con este plan
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={pending || plan === c.plan}
-              onClick={() => run({ plan }, `Plan cambiado a ${plans[plan].label}`)}
-            >
-              Cambiar plan
+              {apply.label}
             </Button>
           )}
         </div>
-        {c.status !== "ACTIVE" && !suspended && (
-          <p className="text-xs text-muted">Actívala cuando la clínica pague su primera mensualidad.</p>
+        {!suspended && (
+          <p className="text-xs text-muted">
+            {inTrial
+              ? "Elige un plan y actívala cuando la clínica pague su primera mensualidad."
+              : choice === TRIAL
+                ? "En prueba vuelve a tener todos los módulos, sin los límites del plan."
+                : "Actívala o cámbiale el plan cuando la clínica pague."}
+          </p>
         )}
       </div>
 
-      {c.status !== "ACTIVE" && !suspended && (
+      {inTrial && (
         <div className="space-y-2 border-t border-line pt-5">
-          <p className="text-sm font-medium">Prueba gratis</p>
+          <p className="text-sm font-medium">Agregar días de prueba</p>
           <div className="flex flex-wrap gap-2">
             <Button type="button" variant="secondary" disabled={pending} onClick={() => extendTrial(7)}>
               +7 días

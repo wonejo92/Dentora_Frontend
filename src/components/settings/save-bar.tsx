@@ -1,14 +1,9 @@
 import { Button } from "@/components/ui/button";
 
-/** Barra inferior de un formulario de ajustes, con confirmación de guardado. */
-export function SaveBar({ pending, saved }: { pending: boolean; saved: boolean }) {
+/** Barra inferior de un formulario de ajustes. La confirmación sale como toast. */
+export function SaveBar({ pending }: { pending: boolean }) {
   return (
     <div className="flex items-center justify-end gap-3">
-      {saved && !pending && (
-        <p role="status" className="text-sm font-medium text-green-700">
-          ✓ Cambios guardados
-        </p>
-      )}
       <Button type="submit" disabled={pending}>
         {pending ? "Guardando…" : "Guardar cambios"}
       </Button>

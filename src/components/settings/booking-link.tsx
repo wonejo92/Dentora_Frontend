@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { markLinkShared } from "@/app/actions/onboarding";
 
 /** Enlaces públicos de la clínica, con botones para copiarlos y abrirlos. */
 export function BookingLink({ siteUrl }: { siteUrl: string }) {
@@ -25,6 +26,8 @@ function LinkRow({ label, hint, url }: { label: string; hint: string; url: strin
   const copy = async () => {
     await navigator.clipboard.writeText(url);
     setCopied(true);
+    // Cuenta para el paso "Comparte tu página de reservas" de los primeros pasos.
+    void markLinkShared();
     setTimeout(() => setCopied(false), 2000);
   };
 

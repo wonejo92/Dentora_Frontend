@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { saveSchedule } from "@/app/actions/doctors";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -98,8 +99,9 @@ function ScheduleEditor({ doctor, onClose }: { doctor: Doctor; onClose: () => vo
     );
     startTransition(async () => {
       const result = await saveSchedule(doctor.id, blocks);
-      if (result.ok) onClose();
-      else setError(result.error);
+      if (!result.ok) return setError(result.error);
+      onClose();
+      toast.success("Horario guardado");
     });
   };
 

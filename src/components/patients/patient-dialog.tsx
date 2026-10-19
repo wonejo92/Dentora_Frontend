@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import { savePatient, type PatientFormState } from "@/app/actions/patients";
 import { FormError } from "@/components/ui/form-error";
 import { Button } from "@/components/ui/button";
@@ -56,6 +57,7 @@ function PatientForm({
       const result = await savePatient(prev, formData);
       if (result.ok) {
         onDone();
+        toast.success(p ? "Datos del paciente guardados" : "Paciente registrado");
         // Al crear, lleva directo a la ficha del paciente nuevo.
         if (!p && result.id) router.push(`/panel/pacientes/${result.id}`);
       }

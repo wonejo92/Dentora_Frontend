@@ -1,13 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { logout } from "@/app/actions/auth";
+import { restoreOnboarding } from "@/app/actions/onboarding";
 import { cn } from "@/lib/cn";
 import { SIDEBAR_COOKIE } from "@/lib/constants";
 import { ThemeSwitch } from "@/components/theme/theme-toggle";
+import { START_TOUR_EVENT } from "./panel-tour";
 import {
+  BoltIcon,
+  CalendarCheckIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   LogoutIcon,
@@ -15,7 +20,13 @@ import {
   ToothIcon,
 } from "./icons";
 
-export type NavItem = { href: string; label: string; icon: React.ReactNode };
+export type NavItem = {
+  href: string;
+  label: string;
+  icon: React.ReactNode;
+  /** Plan que hace falta para usarlo ("Pro"): el módulo no está en el plan actual. */
+  badge?: string;
+};
 export type NavGroup = { title: string; items: NavItem[] };
 
 /** La opción activa es la ruta más larga que coincide (Personal gana a Ajustes en /panel/ajustes/personal). */
@@ -33,7 +44,15 @@ export function Sidebar({
 }: {
   groups: NavGroup[];
   clinicName: string;
-  user: { fullName: string; email: string; role: string; initials: string; canManage: boolean };
+  user: {
+    fullName: string;
+    email: string;
+    role: string;
+    initials: string;
+    canManage: boolean;
+    /** La lista de primeros pasos está oculta y le quedan pasos. */
+    canRestoreOnboarding: boolean;
+  };
   initialCollapsed: boolean;
 }) {
   const pathname = usePathname();
@@ -89,7 +108,7 @@ export function Sidebar({
             <span className="scale-75">{collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}</span>
           </button>
 
-          <nav aria-label="Menú principal" className="mt-5 flex-1 overflow-x-hidden overflow-y-auto">
+          <nav aria-label="Menú principal" data-tour="nav" className="mt-5 flex-1 overflow-x-hidden overflow-y-auto">
             {groups.map((group, i) => (
               <div key={group.title}>
                 {collapsed ? (
@@ -177,7 +196,7 @@ function NavLink({ item, active, collapsed }: { item: NavItem; active: boolean; 
       href={item.href}
       aria-current={active ? "page" : undefined}
       aria-label={collapsed ? item.label : undefined}
-      title={collapsed ? item.label : undefined}
+      title={collapsed ? item.label + (item.badge ? ` (plan ${item.badge})` : "") : undefined}
       className={cn(
         "flex items-center transition-all",
         collapsed ? "size-11 justify-center rounded-full" : "gap-3 rounded-full px-4 py-2.5 text-sm",
@@ -188,6 +207,11 @@ function NavLink({ item, active, collapsed }: { item: NavItem; active: boolean; 
     >
       {item.icon}
       {!collapsed && item.label}
+      {!collapsed && item.badge && (
+        <span className="ml-auto rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-brand-200">
+          {item.badge}
+        </span>
+      )}
     </Link>
   );
 }
@@ -196,9 +220,18 @@ function UserCard({
   user,
   collapsed,
 }: {
-  user: { fullName: string; email: string; role: string; initials: string; canManage: boolean };
+  user: {
+    fullName: string;
+    email: string;
+    role: string;
+    initials: string;
+    canManage: boolean;
+    /** La lista de primeros pasos está oculta y le quedan pasos. */
+    canRestoreOnboarding: boolean;
+  };
   collapsed: boolean;
 }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -221,7 +254,7 @@ function UserCard({
   );
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} data-tour="user" className="relative">
       {open && (
         <div
           role="menu"
@@ -248,6 +281,34 @@ function UserCard({
             <SettingsIcon />
             Ajustes
           </Link>
+          )}
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setOpen(false);
+              window.dispatchEvent(new Event(START_TOUR_EVENT));
+            }}
+            className="flex w-full items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-canvas"
+          >
+            <BoltIcon />
+            Ver tour del panel
+          </button>
+          {user.canRestoreOnboarding && (
+            <button
+              type="button"
+              role="menuitem"
+              onClick={async () => {
+                setOpen(false);
+                const { pending } = await restoreOnboarding();
+                if (!pending) return toast.success("Ya completaste todos los primeros pasos");
+                router.push("/panel");
+              }}
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-canvas"
+            >
+              <CalendarCheckIcon />
+              Mostrar primeros pasos
+            </button>
           )}
           <form action={logout} className="border-t border-line">
             <button

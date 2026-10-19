@@ -11,6 +11,7 @@ import { buttonClass } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { api } from "@/lib/api";
 import { guard, requireClinicUser } from "@/lib/dal";
+import { hasFeature } from "@/lib/plan-limits";
 import { hrefWith, param } from "@/lib/list";
 import {
   addDays,
@@ -178,10 +179,11 @@ export default async function AgendaPage({ searchParams }: PageProps<"/panel/age
                 <p className="truncate text-xs text-muted">
                   {a.treatment.name} · {a.doctor.fullName}
                   {a.source === "ONLINE" && " · Reserva online"}
+                  {a.reminderSentAt && " · Recordatorio enviado"}
                 </p>
               </div>
               <StatusBadge status={a.status} />
-              <AppointmentActions appointment={a} timeZone={tz} canChart={me.role === "OWNER" || me.role === "DOCTOR"} />
+              <AppointmentActions appointment={a} timeZone={tz} canChart={(me.role === "OWNER" || me.role === "DOCTOR") && hasFeature(me, "clinical")} />
             </li>
           ))}
         </ul>

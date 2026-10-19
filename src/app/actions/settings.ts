@@ -59,6 +59,7 @@ export async function saveAgendaRules(_prev: SettingsState, formData: FormData) 
     minBookingNoticeMin: Number(formData.get("minBookingNoticeMin")),
     maxBookingDaysAhead: Number(formData.get("maxBookingDaysAhead")),
     autoConfirmOnline: formData.get("autoConfirmOnline") === "on",
+    emailReminders: formData.get("emailReminders") === "on",
   });
 }
 

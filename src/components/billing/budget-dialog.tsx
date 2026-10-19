@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { toast } from "sonner";
 import { getBudgetTreatments, saveBudget } from "@/app/actions/billing";
 import { Button } from "@/components/ui/button";
 import { controlClass } from "@/components/ui/field";
@@ -111,8 +112,9 @@ export function BudgetDialog({
         notes,
         validUntil,
       });
-      if (result.ok) onClose();
-      else setError(result.error);
+      if (!result.ok) return setError(result.error);
+      onClose();
+      toast.success(budget ? "Presupuesto guardado" : "Presupuesto creado");
     });
   };
 

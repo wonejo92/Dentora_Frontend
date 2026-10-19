@@ -8,6 +8,7 @@ import { ScheduleDialog } from "@/components/doctors/schedule-dialog";
 import { buttonClass } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
+import { plans } from "@/lib/admin";
 import { guard, requireClinicUser } from "@/lib/dal";
 import { initials } from "@/lib/labels";
 import { matches, pageParam, pageSizeParam, paginate, param } from "@/lib/list";
@@ -30,6 +31,9 @@ export default async function DoctorsPage({ searchParams }: PageProps<"/panel/do
     canEdit ? guard(api<StaffUser[]>("/users")) : Promise.resolve([]),
   ]);
   const activeCount = doctors.filter((d) => d.isActive).length;
+  // Máximo de doctores activos del plan (null = sin límite).
+  const maxDoctors = me.planLimits?.maxDoctors ?? null;
+  const atLimit = canEdit && maxDoctors !== null && activeCount >= maxDoctors;
 
   const q = param(params, "q");
   const estado = param(params, "estado");
@@ -58,6 +62,14 @@ export default async function DoctorsPage({ searchParams }: PageProps<"/panel/do
           </DoctorDialog>
         )}
       </div>
+
+      {atLimit && (
+        <p className="rounded-2xl bg-brand-50 px-4 py-3 text-sm text-brand-700">
+          Tu plan {plans[me.clinic.plan].label} permite{" "}
+          {maxDoctors === 1 ? "1 doctor activo" : `hasta ${maxDoctors} doctores activos`}. Para agregar otro, pásate al
+          plan {me.clinic.plan === "BASIC" ? "Pro" : "Clínica"} o desactiva uno de los actuales.
+        </p>
+      )}
 
       {doctors.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">

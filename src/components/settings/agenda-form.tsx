@@ -1,5 +1,6 @@
 "use client";
 
+import { toast } from "sonner";
 import { saveAgendaRules, type SettingsState } from "@/app/actions/settings";
 import { Select, Switch } from "@/components/ui/field";
 import { FormError } from "@/components/ui/form-error";
@@ -36,7 +37,14 @@ function withCurrent(options: { value: number; label: string }[], current: numbe
 }
 
 export function AgendaForm({ clinic: c }: { clinic: Clinic }) {
-  const { state, pending, onSubmit } = useFormAction<SettingsState>(saveAgendaRules, {});
+  const { state, pending, onSubmit } = useFormAction<SettingsState>(
+    async (prev, formData) => {
+      const result = await saveAgendaRules(prev, formData);
+      if (result.ok) toast.success("Reglas de la agenda guardadas");
+      return result;
+    },
+    {},
+  );
   const steps = STEPS.includes(c.slotStepMin) ? STEPS : [...STEPS, c.slotStepMin].sort((a, b) => a - b);
 
   return (
@@ -97,9 +105,15 @@ export function AgendaForm({ clinic: c }: { clinic: Clinic }) {
           description="Si está apagado, llegan como Pendientes y la recepción las confirma desde la agenda."
           defaultChecked={c.autoConfirmOnline}
         />
+        <Switch
+          name="emailReminders"
+          label="Recordar las citas por correo"
+          description="El paciente recibe un correo el día anterior con la hora, el doctor y la dirección. Solo para citas confirmadas de pacientes con correo."
+          defaultChecked={c.emailReminders}
+        />
       </SettingsCard>
 
-      <SaveBar pending={pending} saved={!!state.ok} />
+      <SaveBar pending={pending} />
     </form>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { saveDoctor, type FormState } from "@/app/actions/doctors";
 import { FormError } from "@/components/ui/form-error";
 import { Button } from "@/components/ui/button";
@@ -47,7 +48,10 @@ function DoctorForm({
 }: Omit<Props, "triggerClassName" | "children"> & { onDone: () => void }) {
   const { state, pending, onSubmit } = useFormAction<FormState>(async (prev, formData) => {
     const result = await saveDoctor(prev, formData);
-    if (result.ok) onDone();
+    if (result.ok) {
+      onDone();
+      toast.success(d ? "Doctor guardado" : "Doctor creado");
+    }
     return result;
   }, {});
 

@@ -4,7 +4,9 @@ import { redirect } from "next/navigation";
 import { DateInput } from "@/components/list/date-input";
 import { IncomeChart } from "@/components/reports/income-chart";
 import { BarList, Kpi, Panel } from "@/components/reports/report-parts";
+import { PlanUpgrade } from "@/components/panel/plan-upgrade";
 import { api } from "@/lib/api";
+import { hasFeature } from "@/lib/plan-limits";
 import { methodLabels, money } from "@/lib/billing";
 import { cn } from "@/lib/cn";
 import { guard, requireClinicUser } from "@/lib/dal";
@@ -31,6 +33,7 @@ const shortDate = (date: string) =>
 export default async function ReportsPage({ searchParams }: PageProps<"/panel/reportes">) {
   const me = await requireClinicUser();
   if (me.role !== "OWNER") redirect("/panel");
+  if (!hasFeature(me, "reports")) return <PlanUpgrade feature="reports" plan={me.clinic.plan} />;
   const today = localDate(new Date(), me.clinic.timezone);
 
   const presets = [

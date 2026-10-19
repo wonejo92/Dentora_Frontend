@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { saveMedicalHistory } from "@/app/actions/clinical";
 import { Button } from "@/components/ui/button";
 import { controlClass } from "@/components/ui/field";
@@ -68,8 +69,9 @@ function HistoryForm({
         conditions,
         answers,
       });
-      if (result.ok) onClose();
-      else setError(result.error);
+      if (!result.ok) return setError(result.error);
+      onClose();
+      toast.success("Antecedentes guardados");
     });
   };
 

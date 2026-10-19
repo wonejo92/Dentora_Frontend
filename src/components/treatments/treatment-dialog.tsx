@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { saveTreatment, type FormState } from "@/app/actions/treatments";
 import { FormError } from "@/components/ui/form-error";
 import { Button } from "@/components/ui/button";
@@ -56,7 +57,10 @@ function TreatmentForm({
   const options = doctors.filter((d) => d.isActive || assigned.has(d.id));
   const { state, pending, onSubmit } = useFormAction<FormState>(async (prev, formData) => {
     const result = await saveTreatment(prev, formData);
-    if (result.ok) onDone();
+    if (result.ok) {
+      onDone();
+      toast.success(t ? "Tratamiento guardado" : "Tratamiento creado");
+    }
     return result;
   }, {});
 

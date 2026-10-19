@@ -31,6 +31,20 @@ export interface Me {
     primaryColor: string;
   } | null;
   doctor: { id: string } | null;
+  /** Cuándo vio el tour del panel (null = aún no: se abre solo). */
+  tourSeenAt: string | null;
+  /** Límites vigentes del plan (durante la prueba, todo habilitado). */
+  planLimits: PlanLimits | null;
+}
+
+export type PlanFeature = "clinical" | "billing" | "reports";
+
+export interface PlanLimits {
+  /** null = sin límite. */
+  maxDoctors: number | null;
+  /** Usuarios de recepción y asistentes. */
+  supportStaff: boolean;
+  features: Record<PlanFeature, boolean>;
 }
 
 export interface Appointment {
@@ -40,6 +54,8 @@ export interface Appointment {
   status: AppointmentStatus;
   source: "PANEL" | "ONLINE";
   notes: string | null;
+  /** Cuándo se envió el recordatorio por correo al paciente. */
+  reminderSentAt: string | null;
   patient: {
     id: string;
     firstName: string;
@@ -198,6 +214,7 @@ export interface Clinic {
   minBookingNoticeMin: number;
   maxBookingDaysAhead: number;
   autoConfirmOnline: boolean;
+  emailReminders: boolean;
 }
 
 export interface TimeOff {
@@ -465,4 +482,17 @@ export interface AdminClinicDetail {
   _count: { patients: number; appointments: number; doctors: number; users: number; treatments: number };
   appointmentsThisMonth: number;
   lastActivityAt: string | null;
+}
+
+/** Primeros pasos de una clínica nueva (cada uno se calcula con sus datos). */
+export interface OnboardingStatus {
+  dismissed: boolean;
+  steps: {
+    profile: boolean;
+    treatments: boolean;
+    doctors: boolean;
+    schedules: boolean;
+    shareLink: boolean;
+    firstAppointment: boolean;
+  };
 }
